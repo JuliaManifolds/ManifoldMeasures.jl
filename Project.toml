@@ -3,10 +3,12 @@ uuid = "220fa119-603f-4115-915b-ee7b5d8454ef"
 authors = ["Seth Axen <seth.axen@gmail.com> and contributors"]
 version = "0.1.0"
 
+[deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Manifolds = "1cead3c2-87b3-11e9-0ccd-23c62b72b94e"
 MeasureTheory = "eadaa1a4-d27c-401d-8699-e962e1bbc33b"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+
 [compat]
 Manifolds = "0.5"
 MeasureTheory = "0.9.3"
