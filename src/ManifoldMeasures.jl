@@ -10,6 +10,7 @@ include("primitive.jl")
 include("stiefel/primitive.jl")
 include("stiefel/matrixlangevin.jl")
 include("stiefel/matrixbingham.jl")
+include("stiefel/macg.jl")
 
 # primitive
 export Hausdorff, Haar
