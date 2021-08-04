@@ -15,4 +15,7 @@ include("stiefel/macg.jl")
 # primitive
 export Hausdorff, Haar
 
+# stiefel
+export MatrixLangevin, MatrixVonMisesFisher, MatrixBingham, MatrixAngularCentralGaussian
+
 end
