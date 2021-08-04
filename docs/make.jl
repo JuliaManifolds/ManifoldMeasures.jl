@@ -1,7 +1,9 @@
 using ManifoldMeasures
 using Documenter
 
-DocMeta.setdocmeta!(ManifoldMeasures, :DocTestSetup, :(using ManifoldMeasures); recursive=true)
+DocMeta.setdocmeta!(
+    ManifoldMeasures, :DocTestSetup, :(using ManifoldMeasures); recursive=true
+)
 
 makedocs(;
     modules=[ManifoldMeasures],
@@ -13,12 +15,7 @@ makedocs(;
         canonical="https://sethaxen.github.io/ManifoldMeasures.jl",
         assets=String[],
     ),
-    pages=[
-        "Home" => "index.md",
-    ],
+    pages=["Home" => "index.md"],
 )
 
-deploydocs(;
-    repo="github.com/sethaxen/ManifoldMeasures.jl",
-    devbranch="main",
-)
+deploydocs(; repo="github.com/sethaxen/ManifoldMeasures.jl", devbranch="main")
