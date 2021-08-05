@@ -3,7 +3,7 @@
 mvgamma(m, a) = π^(m * (m - 1)//4) * prod(i -> gamma(a - (i - 1)//2), 1:m)
 
 # tr(A'B)
-tr_At_B(A, B) = sum((Ai, Bi) -> dot(Ai, Bi), zip(eachcol(A), eachcol(B)))
+tr_At_B(A, B) = sum(x -> dot(x...), zip(eachcol(A), eachcol(B)))
 
 # hypergeometric functions with matrix arguments
 pFq((), (), x) = exp(tr(x)) # ₀F₀
