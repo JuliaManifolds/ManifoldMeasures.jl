@@ -16,6 +16,7 @@ function MeasureTheory.basemeasure(μ::MatrixLangevin{(:F,)})
 end
 
 function MeasureTheory.logdensity(d::MatrixLangevin{(:F,)}, x::AbstractMatrix)
+    n, _ = representation_size(base_manifold(d))
     F = d.F
     return tr_At_B(F, x) - log(pFq((), (n//2,), rmul!(F'F, 1//4)))
 end

@@ -15,5 +15,6 @@ end
 
 function MeasureTheory.logdensity(d::MatrixBingham{(:B,)}, x::AbstractMatrix)
     B = d.B
+    n, k = representation_size(base_manifold(d))
     return dot(x, B, x) - log(pFq((k//2,), (n//2,), B))
 end
