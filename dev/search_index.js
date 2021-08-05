@@ -1,0 +1,3 @@
+var documenterSearchIndex = {"docs":
+[{"location":"","page":"Home","title":"Home","text":"CurrentModule = ManifoldMeasures","category":"page"},{"location":"#ManifoldMeasures","page":"Home","title":"ManifoldMeasures","text":"","category":"section"},{"location":"","page":"Home","title":"Home","text":"Documentation for ManifoldMeasures.","category":"page"},{"location":"","page":"Home","title":"Home","text":"","category":"page"},{"location":"","page":"Home","title":"Home","text":"Modules = [ManifoldMeasures]","category":"page"},{"location":"#ManifoldMeasures.volume","page":"Home","title":"ManifoldMeasures.volume","text":"volume(M::AbstractManifold)\n\nCompute the area/volume of the manifold M.\n\n\n\n\n\n","category":"function"}]
+}
