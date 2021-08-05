@@ -1,5 +1,5 @@
 """
-volume(M::AbstractManifold)
+    volume(M::AbstractManifold)
 
 Compute the area/volume of the manifold `M`.
 """
