@@ -24,8 +24,9 @@ end
 function Base.rand(rng::AbstractRNG, T::Type, d::MatrixLangevin{(:F,)})
     F = d.F
     trΛ = sum(svdvals(F))
+    μ = Hausdorff(base_manifold(d), F)
     while true
-        x = rand(rng, T, basemeasure(d))
+        x = rand(rng, T, μ)
         rand(rng) < exp(tr_At_B(F, x) - trΛ) && return x
     end
 end
