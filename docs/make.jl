@@ -8,14 +8,14 @@ DocMeta.setdocmeta!(
 makedocs(;
     modules=[ManifoldMeasures],
     authors="Seth Axen <seth.axen@gmail.com> and contributors",
-    repo="https://github.com/sethaxen/ManifoldMeasures.jl/blob/{commit}{path}#{line}",
+    repo="https://github.com/JuliaManifolds/ManifoldMeasures.jl/blob/{commit}{path}#{line}",
     sitename="ManifoldMeasures.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://sethaxen.github.io/ManifoldMeasures.jl",
+        canonical="https://JuliaManifolds.github.io/ManifoldMeasures.jl",
         assets=String[],
     ),
     pages=["Home" => "index.md"],
 )
 
-deploydocs(; repo="github.com/sethaxen/ManifoldMeasures.jl", devbranch="main")
+deploydocs(; repo="github.com/JuliaManifolds/ManifoldMeasures.jl", devbranch="main")

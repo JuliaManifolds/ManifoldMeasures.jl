@@ -4,7 +4,7 @@ CurrentModule = ManifoldMeasures
 
 # ManifoldMeasures
 
-Documentation for [ManifoldMeasures](https://github.com/sethaxen/ManifoldMeasures.jl).
+Documentation for [ManifoldMeasures](https://github.com/JuliaManifolds/ManifoldMeasures.jl).
 
 ```@index
 ```
