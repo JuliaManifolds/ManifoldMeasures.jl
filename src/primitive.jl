@@ -30,13 +30,6 @@ function Base.show(io::IO, ::MIME"text/plain", μ::Hausdorff)
     return print(io, "Hausdorff", (μ.manifold, μ.point, μ.atlas))
 end
 
-# TODO: how to specify density of Hausdorff wrt Lebesgue in MeasureTheory?
-function MeasureTheory.basemeasure(
-    μ::Hausdorff{<:AbstractManifold{ℝ},P,<:AbstractAtlas}
-) where {P}
-    return Lebesgue(MeasureTheory.ℝ)^manifold_dimension(μ.manifold)
-end
-
 Manifolds.base_manifold(μ::Hausdorff) = μ.manifold
 
 MeasureTheory.sampletype(::Hausdorff{M,P}) where {M,P} = P
