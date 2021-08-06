@@ -8,7 +8,9 @@ const UniformStiefelMeasures{n,k} = Hausdorff{Stiefel{n,k,ℝ}}
 # This implementation uses the unique QR decomposition z=QR where R[i,i] > 0, where Q is then
 # drawn from the Hausdorff measure on St(n,k).
 # See Theorem 2.3.19 of Gupta AK, Nagar DK. Matrix variate distributions. CRC Press; 2018
-function Random.rand!(rng::AbstractRNG, p::AbstractMatrix, ::Hausdorff{<:Stiefel{n,k,ℝ}}) where {n,k}
+function Random.rand!(
+    rng::AbstractRNG, p::AbstractMatrix, ::Hausdorff{<:Stiefel{n,k,ℝ}}
+) where {n,k}
     randn!(rng, p)
     Q, R = qr(p)
     p .= Matrix(Q) .* sign.(view(R, diagind(R))')
@@ -23,6 +25,6 @@ end
 
 # Chikuse, 2003 Eq. 1.4.8
 function logmass(::UniformStiefelMeasures{n,k}) where {n,k}
-    halfn = n // 2
+    halfn = n//2
     return k * logtwo + (k * halfn) * logπ - logmvgamma(k, halfn)
 end

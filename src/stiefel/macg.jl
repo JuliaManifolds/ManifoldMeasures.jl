@@ -29,7 +29,9 @@ function MeasureTheory.logdensity(d::MatrixAngularCentralGaussian{(:L,)}, x::Abs
     return -n//2 * log(dot(z, z)) - k * logdet(L)
 end
 
-function Random.rand!(rng::AbstractRNG, p::AbstractMatrix, d::MatrixAngularCentralGaussian{(:L,)})
+function Random.rand!(
+    rng::AbstractRNG, p::AbstractMatrix, d::MatrixAngularCentralGaussian{(:L,)}
+)
     L = d.L
     z = randn!(rng, p)
     y = lmul!(LowerTriangular(L), z)
