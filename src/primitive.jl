@@ -1,9 +1,12 @@
 """
-volume(M::AbstractManifold)
+    total_mass(μ::AbstractMeasure)
 
-Compute the area/volume of the manifold `M`.
+Compute the total mass of the measure `μ` over its manifold `M`, that is `μ(M) = ∫_M dμ(x)`.
 """
-function volume end
+function total_mass end
+
+# Warning! Type-piracy! ☠️
+LinearAlgebra.normalize(μ::AbstractMeasure) = inv(total_mass(μ)) * μ
 
 Manifolds.base_manifold(μ::AbstractMeasure) = base_manifold(basemeasure(μ))
 Manifolds.manifold_dimension(μ::AbstractMeasure) = manifold_dimension(base_manifold(μ))
@@ -35,8 +38,6 @@ Manifolds.base_manifold(μ::Hausdorff) = μ.manifold
 MeasureTheory.sampletype(::Hausdorff{M,P}) where {M,P} = P
 
 MeasureTheory.logdensity(::Hausdorff, x) = zero(eltype(x))
-
-LinearAlgebra.normalize(μ::Hausdorff) = inv(volume(μ.manifold)) * μ
 
 function Base.rand(rng::AbstractRNG, T::Type, μ::WeightedMeasure{S,<:Hausdorff}) where {S}
     return rand(rng, T, μ.base)

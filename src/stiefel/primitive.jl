@@ -22,4 +22,4 @@ function MeasureTheory.logdensity(
 end
 
 # Chikuse, 2003 Eq. 1.4.8
-volume(::Stiefel{n,k,ℝ}) where {n,k} = 2^k * π^(k * n//2) / mvgamma(k, n//2)
+total_mass(::UniformStiefelMeasures{n,k}) where {n,k} = 2^k * π^((k * n)//2) / mvgamma(k, n//2)
