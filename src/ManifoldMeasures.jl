@@ -2,7 +2,6 @@ module ManifoldMeasures
 
 using KeywordCalls,
     LinearAlgebra, Manifolds, MeasureTheory, Random, SpecialFunctions, StatsFuns
-using Distributions: Distributions
 using Manifolds: ℝ
 
 include("specialfunctions.jl")
