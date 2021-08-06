@@ -1,12 +1,13 @@
 """
-    total_mass(μ::AbstractMeasure)
+    log_total_mass(μ::AbstractMeasure)
 
-Compute the total mass of the measure `μ` over its manifold `M`, that is `μ(M) = ∫_M dμ(x)`.
+Compute the logarithm of the total mass of the measure `μ` over its manifold `M`, that is
+`μ(M) = ∫_M dμ(x)`.
 """
-function total_mass end
+function log_total_mass end
 
 # Warning! Type-piracy! ☠️
-LinearAlgebra.normalize(μ::AbstractMeasure) = inv(total_mass(μ)) * μ
+LinearAlgebra.normalize(μ::AbstractMeasure) = MeasureTheory.Exp(-log_total_mass(μ)) * μ
 
 Manifolds.base_manifold(μ::AbstractMeasure) = base_manifold(basemeasure(μ))
 Manifolds.manifold_dimension(μ::AbstractMeasure) = manifold_dimension(base_manifold(μ))
