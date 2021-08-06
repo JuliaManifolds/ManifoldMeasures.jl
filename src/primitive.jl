@@ -23,52 +23,46 @@ MeasureTheory.testvalue(μ::PrimitiveMeasure) = μ.point
 # dμ(x) = det(G(x))^(-1/2) dλ(f⁻¹(x)), where G(x) is the matrix representation of the metric tensor
 # in M, given by G(x) = J(x)ᵀ J(x), where J is the Jacobian of f.
 # This is the un-normalized Hausdorff measure, which integrates to the area/volume of M.
-struct Hausdorff{M<:AbstractManifold,P,A} <: PrimitiveMeasure
+struct Hausdorff{M<:AbstractManifold,A} <: PrimitiveMeasure
     manifold::M
-    point::P  # for random sampling
     atlas::A  # optional, when the Hausdorff measure is constructed from a Lebesgue measure
 end
-Hausdorff(M::AbstractManifold, point) = Hausdorff(M, point, nothing)
+Hausdorff(M::AbstractManifold) = Hausdorff(M, nothing)
 
 function Base.show(io::IO, ::MIME"text/plain", μ::Hausdorff)
-    return print(io, "Hausdorff", (μ.manifold, μ.point, μ.atlas))
+    return print(io, "Hausdorff", (μ.manifold, μ.atlas))
 end
 
 Manifolds.base_manifold(μ::Hausdorff) = μ.manifold
 
-MeasureTheory.sampletype(::Hausdorff{M,P}) where {M,P} = P
-
 MeasureTheory.logdensity(::Hausdorff, x) = zero(eltype(x))
 
-function Base.rand(rng::AbstractRNG, T::Type, μ::WeightedMeasure{S,<:Hausdorff}) where {S}
-    return rand(rng, T, μ.base)
+function Random.rand!(rng::AbstractRNG, p, μ::WeightedMeasure{S,<:Hausdorff}) where {S}
+    return rand!(rng, p, μ.base)
 end
 
 # The Haar measure is a left- or right-invariant measure on a group manifold.
 # That is, given p ∈ G and q ∈ H ⊆ G, where τ(H, p) is the set of all q τ-translated
 # (left- or right-) by p, then μ(τ(H, p)) = μ(H). This is the τ-invariant Haar measure
 # on G.
-struct Haar{M<:AbstractManifold,P,D<:ActionDirection} <: PrimitiveMeasure
+struct Haar{M<:AbstractManifold,D<:ActionDirection} <: PrimitiveMeasure
     group::M
-    point::P
     direction::D
 end
-Haar(G::AbstractManifold, point) = Haar(G, point, LeftAction())
+Haar(G::AbstractManifold) = Haar(G, LeftAction())
 
-const LeftHaar{M,P} = Haar{M,P,LeftAction}
-LeftHaar(G, point) = Haar(G, point, LeftAction())
+const LeftHaar{M} = Haar{M,LeftAction}
+LeftHaar(G) = Haar(G, LeftAction())
 
-const RightHaar{M,P} = Haar{M,P,RightAction}
-RightHaar(G, point) = Haar(G, point, RightAction())
+const RightHaar{M} = Haar{M,RightAction}
+RightHaar(G) = Haar(G, RightAction())
 
 function Base.show(io::IO, ::MIME"text/plain", μ::Haar)
-    return print(io, "Haar", (μ.group, μ.point, μ.direction))
+    return print(io, "Haar", (μ.group, μ.direction))
 end
 
 Manifolds.base_manifold(μ::Haar) = μ.group
 Manifolds.base_group(μ::Haar) = μ.group
 Manifolds.direction(μ::Haar) = μ.direction
-
-MeasureTheory.sampletype(::Haar{M,P}) where {M,P} = P
 
 MeasureTheory.logdensity(::Haar, x) = zero(eltype(x))

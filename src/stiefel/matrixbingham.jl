@@ -9,8 +9,8 @@ end
 
 Manifolds.base_manifold(d::MatrixBingham) = getfield(d, :manifold)
 
-function MeasureTheory.basemeasure(μ::MatrixBingham{(:B,)})
-    return normalize(Hausdorff(base_manifold(μ), μ.B))
+function MeasureTheory.basemeasure(μ::MatrixBingham)
+    return normalize(Hausdorff(base_manifold(μ)))
 end
 
 function MeasureTheory.logdensity(d::MatrixBingham{(:B,)}, x::AbstractMatrix)

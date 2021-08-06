@@ -10,11 +10,8 @@ end
 
 Manifolds.base_manifold(d::MatrixAngularCentralGaussian) = getfield(d, :manifold)
 
-function MeasureTheory.basemeasure(μ::MatrixAngularCentralGaussian{(:Σ⁻¹,)})
-    return normalize(Hausdorff(base_manifold(μ), μ.Σ⁻¹))
-end
-function MeasureTheory.basemeasure(μ::MatrixAngularCentralGaussian{(:L,)})
-    return normalize(Hausdorff(base_manifold(μ), μ.L))
+function MeasureTheory.basemeasure(μ::MatrixAngularCentralGaussian)
+    return normalize(Hausdorff(base_manifold(μ)))
 end
 
 # Chikuse, 2003 Eq. 2.4.3
@@ -32,9 +29,9 @@ function MeasureTheory.logdensity(d::MatrixAngularCentralGaussian{(:L,)}, x::Abs
     return -n//2 * log(dot(z, z)) - k * logdet(L)
 end
 
-function Base.rand(rng::AbstractRNG, ::Type, d::MatrixAngularCentralGaussian{(:L,)})
+function Random.rand!(rng::AbstractRNG, p::AbstractMatrix, d::MatrixAngularCentralGaussian{(:L,)})
     L = d.L
-    z = randn!(rng, similar(d.L, representation_size(base_manifold(d))))
+    z = randn!(rng, p)
     y = lmul!(LowerTriangular(L), z)
-    return y * (Symmetric(y'y))^(-1//2)
+    return mul!(p, y, (Symmetric(y'y))^(-1//2))
 end
