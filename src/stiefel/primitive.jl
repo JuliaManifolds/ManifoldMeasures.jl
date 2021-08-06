@@ -22,7 +22,7 @@ function MeasureTheory.logdensity(
 end
 
 # Chikuse, 2003 Eq. 1.4.8
-function log_total_mass(::UniformStiefelMeasures{n,k}) where {n,k}
+function logmass(::UniformStiefelMeasures{n,k}) where {n,k}
     halfn = n // 2
     return k * logtwo + (k * halfn) * logπ - logmvgamma(k, halfn)
 end
