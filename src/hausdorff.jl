@@ -65,7 +65,9 @@ end
 
 # ProjectiveSpace
 
-function Base.rand!(rng::AbstractRNG, p::AbstractArray, μ::Hausdorff{<:AbstractProjectiveSpace})
+function Base.rand!(
+    rng::AbstractRNG, p::AbstractArray, μ::Hausdorff{<:AbstractProjectiveSpace}
+)
     return normalize!(randn!(rng, p))
 end
 

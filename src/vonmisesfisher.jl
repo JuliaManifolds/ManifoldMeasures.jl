@@ -10,7 +10,7 @@ const Langevin = VonMisesFisher
 
 Manifolds.base_manifold(d::VonMisesFisher) = getfield(d, :manifold)
 
-function MeasureTheory.basemeasure(μ::VonMisesFisher)
+function MeasureTheory.basemeasure(μ::VonMisesFisher{<:Union{AbstractSphere,Stiefel}})
     return normalize(Hausdorff(base_manifold(μ)))
 end
 
