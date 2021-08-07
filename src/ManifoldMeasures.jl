@@ -13,17 +13,11 @@ include("hausdorff.jl")
 
 include("vonmisesfisher.jl")
 include("bingham.jl")
-
-include("stiefel/matrixlangevin.jl")
-include("stiefel/matrixbingham.jl")
-include("stiefel/macg.jl")
+include("angularcentralgaussian.jl")
 
 # primitive
 export Hausdorff, Haar
 
-export VonMisesFisher, Langevin
-
-# stiefel
-export MatrixBingham, MatrixAngularCentralGaussian
+export AngularCentralGaussian, Bingham, Langevin, VonMisesFisher
 
 end
