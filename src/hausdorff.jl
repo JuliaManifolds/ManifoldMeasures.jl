@@ -51,3 +51,25 @@ function logmass(::Hausdorff{Stiefel{n,k,ℝ}}) where {n,k}
     return k * logtwo + (k * halfn) * logπ - logmvgamma(k, halfn)
 end
 
+# Sphere
+
+function Base.rand!(rng::AbstractRNG, p::AbstractArray, μ::Hausdorff{<:AbstractSphere})
+    return normalize!(randn!(rng, p))
+end
+
+function logmass(μ::Hausdorff{AbstractSphere{𝔽}}) where {𝔽}
+    n = manifold_dimension(base_manifold(μ))
+    ν = number_dimension(𝔽) * (n + 1)//2
+    return ν * log2π - loggamma(ν)
+end
+
+# ProjectiveSpace
+
+function Base.rand!(rng::AbstractRNG, p::AbstractArray, μ::Hausdorff{<:AbstractProjectiveSpace})
+    return normalize!(randn!(rng, p))
+end
+
+function logmass(μ::Hausdorff{AbstractProjectiveSpace{𝔽}}) where {𝔽}
+    n = manifold_dimension(μ)
+    return logmass(Hausdorff(Sphere(n, 𝔽))) - logmass(Hausdorff(Sphere(0, 𝔽)))
+end
