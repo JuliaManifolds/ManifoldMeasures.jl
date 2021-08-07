@@ -5,6 +5,7 @@ using KeywordCalls,
 using Manifolds: ℝ
 
 include("specialfunctions.jl")
+include("factorizations.jl")
 include("primitive.jl")
 include("stiefel/primitive.jl")
 include("stiefel/matrixlangevin.jl")
