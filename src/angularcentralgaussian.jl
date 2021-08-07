@@ -5,7 +5,7 @@ struct AngularCentralGaussian{M,N,T} <: ParameterizedMeasure{N}
     par::NamedTuple{N,T}
 end
 
-AngularCentralGaussian(M; kwargs...) = AngularCentralGaussian(M, kwargs)
+AngularCentralGaussian(M; kwargs...) = AngularCentralGaussian(M, NamedTuple(kwargs))
 
 Manifolds.base_manifold(d::AngularCentralGaussian) = getfield(d, :manifold)
 
@@ -18,7 +18,7 @@ function MeasureTheory.logdensity(
     d::AngularCentralGaussian{<:ACGManifolds,(:Σ⁻¹,)}, x::AbstractArray
 )
     s = representation_size(base_manifold(d))
-    n, k = length(s) == 1 ? first(s), 1 : s
+    n, k = length(s) == 1 ? (first(s), 1) : s
     Σ⁻¹ = d.Σ⁻¹
     return -n//2 * log(real(dot(x, Σ⁻¹, x))) + k//2 * real(logdet(Σ⁻¹))
 end
@@ -26,7 +26,7 @@ function MeasureTheory.logdensity(
     d::AngularCentralGaussian{<:ACGManifolds,(:L,)}, x::AbstractArray
 )
     s = representation_size(base_manifold(d))
-    n, k = length(s) == 1 ? first(s), 1 : s
+    n, k = length(s) == 1 ? (first(s), 1) : s
     L = d.L
     z = LowerTriangular(L) \ x
     return -n//2 * log(real(dot(z, z))) - k * real(logdet(L))

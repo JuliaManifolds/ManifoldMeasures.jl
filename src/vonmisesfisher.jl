@@ -2,9 +2,7 @@ struct VonMisesFisher{M,N,T} <: ParameterizedMeasure{N}
     manifold::M
     par::NamedTuple{N,T}
 end
-function VonMisesFisher(M::AbstractManifold; kwargs...)
-    return VonMisesFisher(M, kwargs)
-end
+VonMisesFisher(M::AbstractManifold; kwargs...) = VonMisesFisher(M, NamedTuple(kwargs))
 
 const Langevin = VonMisesFisher
 
