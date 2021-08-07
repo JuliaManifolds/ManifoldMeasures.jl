@@ -10,7 +10,10 @@ include("factorizations.jl")
 include("primitive.jl")
 include("haar.jl")
 include("hausdorff.jl")
+
 include("vonmisesfisher.jl")
+include("bingham.jl")
+
 include("stiefel/matrixlangevin.jl")
 include("stiefel/matrixbingham.jl")
 include("stiefel/macg.jl")
