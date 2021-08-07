@@ -1,6 +1,3 @@
-# tr(A'B)
-tr_At_B(A, B) = sum(x -> dot(x...), zip(eachcol(A), eachcol(B)))
-
 # hypergeometric functions with matrix arguments
 pFq((), (), x) = exp(tr(x)) # ₀F₀
 # TODO: Implement ₀F₁
