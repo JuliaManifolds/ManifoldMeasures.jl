@@ -27,10 +27,10 @@ LinearAlgebra.normalize(μ::Hausdorff) = Normalized(Hausdorff(base_manifold(μ))
 
 # Stiefel
 
-# In general, given matrix z ∈ ℝ^(n × k) with IID std normal elements, p=z(z'z)^(-1/2) is drawn
-# from the Hausdorff measure on St(n,k).
-# This implementation uses the unique QR decomposition z=QR where R[i,i] > 0, where Q is then
-# drawn from the Hausdorff measure on St(n,k).
+# In general, given matrix z ∈ 𝔽^(n × k) with IID std normal elements, p=z(z'z)^(-1/2) is drawn
+# from the Hausdorff measure on St(n,k,𝔽).
+# This implementation uses the unique QR decomposition z=QR where R[i,i] is real and positive
+# for all i, so that Q ~ Hausdorff(St(n,k,𝔽)).
 # See Theorem 2.3.19 of Gupta AK, Nagar DK. Matrix variate distributions. CRC Press; 2018
 function Random.rand!(
     rng::AbstractRNG, p::AbstractMatrix, ::Normalized{<:Hausdorff{<:Stiefel}}
@@ -45,6 +45,31 @@ function logmass(::Hausdorff{Stiefel{n,k,ℝ}}) where {n,k}
     halfn = n//2
     return k * logtwo + (k * halfn) * logπ - logmvgamma(k, halfn)
 end
+# vol(St(n,k,𝔽)) = vol(𝔽𝕊ⁿ⁻¹) * vol(St(n-1,k-1,𝔽)), Chikuse, 2003 §1.4.4
+# then, vol(St(n,k,𝔽)) = 2ᵏ π^(k(2n-k+1)d/4) / ∏ᵢ₌₁ᵏΓ(d(n-k+i)/2)),
+# where d = real_dimension(𝔽)
+function logmass(::Hausdorff{Stiefel{n,k,ℂ}}) where {n,k}
+    a = n - k
+    lfact = logfactorial(a)
+    lm = k * logtwo + (k * (2n - k + 1) // 2) * logπ + lfact
+    for _ in 1:(k-1)
+        a += 1
+        lfact += log(a)
+        lm += lfact
+    end
+    return lm
+end
+function logmass(::Hausdorff{Stiefel{n,k,ℍ}}) where {n,k}
+    a = 2(n - k) + 1
+    lfact = k * logtwo + (k * (a + k)) * logπ + logfactorial(a)
+    lm = lfact
+    for _ in 1:(k - 1)
+        a += 2
+        lfact += log(a) + log(a - 1)
+        lm += lfact
+    end
+    return lm
+end
 
 # Grassmann
 
@@ -54,8 +79,43 @@ function Random.rand!(
     return rand!(rng, p, Hausdorff(Stiefel(n, k, 𝔽)))
 end
 
+# because Gr(n,k,𝔽) = St(n,k,𝔽) / U(k,𝔽),
+# then vol(Gr(n,k,𝔽)) = vol(St(n,k,𝔽)) / vol(St(k,k,𝔽))
+#                     = π^(k((n-k)d/2)) ∏ᵢ₌₁ᵏ Γ(id/2) / Γ((n-k)d/2 + id/2),
+# where d = real_dimension(𝔽)
 function logmass(::Hausdorff{Grassmann{n,k,𝔽}}) where {n,k,𝔽}
     return logmass(Hausdorff(Stiefel(n, k, 𝔽))) - logmass(Hausdorff(Stiefel(k, k, 𝔽)))
+end
+function logmass(::Hausdorff{Grassmann{n,k,ℝ}}) where {n,k}
+    return k*(n - k)//2 * logπ + logmvgamma(k, k//2) - logmvgamma(k, n//2)    
+end
+function logmass(::Hausdorff{Grassmann{n,k,ℂ}}) where {n,k}
+    a = n - k
+    lfact1 = logfactorial(a)
+    lfact2 = log(1)
+    lm = k*a * logπ + lfact1 - lfact2
+    for i in 1:(k-1)
+        a += 1
+        lfact1 += log(a)
+        lfact2 += log(i)
+        lm += lfact1 - lfact2
+    end
+    return lm
+end
+function logmass(::Hausdorff{Grassmann{n,k,ℍ}}) where {n,k}
+    a = 2(n - k) + 1
+    b = 1
+    lfact1 = logfactorial(a)
+    lfact2 = log(b)
+    lm = 2*k*(n-k) * logπ + lfact1 - lfact2
+    for _ in 1:(k-1)
+        a += 2
+        b += 2
+        lfact1 += log(a) + log(a-1)
+        lfact2 += log(b) + log(b-1)
+        lm += lfact1 - lfact2
+    end
+    return lm
 end
 
 # Sphere
@@ -66,9 +126,14 @@ function Random.rand!(
     return normalize!(randn!(rng, p))
 end
 
+function logmass(μ::Hausdorff{<:AbstractSphere{ℝ}})
+    n = manifold_dimension(base_manifold(μ))
+    ν = (n + 1)//2
+    return logtwo + ν * logπ - loggamma(ν)
+end
 function logmass(μ::Hausdorff{<:AbstractSphere{𝔽}}) where {𝔽}
     n = manifold_dimension(base_manifold(μ))
-    ν = real_dimension(𝔽) * (n + 1)//2
+    ν = div(real_dimension(𝔽) * (n + 1), 2)
     return logtwo + ν * logπ - loggamma(ν)
 end
 
@@ -80,7 +145,7 @@ function Random.rand!(
     return normalize!(randn!(rng, p))
 end
 
-# because 𝔽ℙⁿ = 𝔽𝕊ⁿ / 𝔽𝕊⁰, then mass(𝔽ℙⁿ) = mass(𝔽𝕊ⁿ) / mass(𝔽𝕊⁰)
+# because 𝔽ℙⁿ = 𝔽𝕊ⁿ / 𝔽𝕊⁰, then vol(𝔽ℙⁿ) = vol(𝔽𝕊ⁿ) / vol(𝔽𝕊⁰)
 function logmass(μ::Hausdorff{<:AbstractProjectiveSpace{ℝ}})
     n = manifold_dimension(μ)
     ν = (n + 1)//2
@@ -92,6 +157,6 @@ function logmass(μ::Hausdorff{<:AbstractProjectiveSpace{ℂ}})
 end
 function logmass(μ::Hausdorff{<:AbstractProjectiveSpace{ℍ}})
     n = manifold_dimension(μ)
-    return 2n * logπ - logfactorial(2n + 1)
+    return 2n * logπ - loggamma(2n)
 end
 end
