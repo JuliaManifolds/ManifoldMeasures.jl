@@ -1,0 +1,32 @@
+"""
+    logmass(μ::AbstractMeasure)
+
+Compute the logarithm of the total mass of the measure `μ` over its manifold `M`, that is
+`μ(M) = ∫_M dμ(x)`.
+"""
+function logmass end
+
+mass(μ) = MeasureTheory.Exp(-logmass(μ))
+
+# Warning! Type-piracy! ☠️
+LinearAlgebra.normalize(μ::AbstractMeasure) = mass(μ) * μ
+
+struct Normalized{M} <: AbstractMeasure
+    base::M
+end
+
+function Base.show(io::IO, mime::MIME"text/plain", μ::Normalized)
+    print(io, "Normalized(")
+    show(io, mime, basemeasure(μ))
+    return print(io, ")")
+end
+
+MeasureTheory.basemeasure(μ::Normalized) = μ.base
+
+function MeasureTheory.logdensity(μ::Normalized, x)
+    return zero(eltype(x)) - logmass(basemeasure(μ))
+end
+
+logmass(μ::Normalized) = false
+
+LinearAlgebra.normalize(μ::Normalized) = μ
