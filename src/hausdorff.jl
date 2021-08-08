@@ -46,6 +46,18 @@ function logmass(::Hausdorff{Stiefel{n,k,ℝ}}) where {n,k}
     return k * logtwo + (k * halfn) * logπ - logmvgamma(k, halfn)
 end
 
+# Grassmann
+
+function Random.rand!(
+    rng::AbstractRNG, p::AbstractMatrix, ::Normalized{Hausdorff{Grassmann{n,k,𝔽}}}
+) where {n,k,𝔽}
+    return rand!(rng, p, Hausdorff(Stiefel(n, k, 𝔽)))
+end
+
+function logmass(::Hausdorff{Grassmann{n,k,𝔽}}) where {n,k,𝔽}
+    return logmass(Hausdorff(Stiefel(n, k, 𝔽))) - logmass(Hausdorff(Stiefel(k, k, 𝔽)))
+end
+
 # Sphere
 
 function Random.rand!(
