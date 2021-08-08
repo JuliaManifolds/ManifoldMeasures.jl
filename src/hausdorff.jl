@@ -14,8 +14,9 @@ struct Hausdorff{M<:AbstractManifold,A} <: PrimitiveMeasure
 end
 Hausdorff(M::AbstractManifold) = Hausdorff(M, nothing)
 
-function Base.show(io::IO, ::MIME"text/plain", μ::Hausdorff)
-    return print(io, "Hausdorff", (μ.manifold, μ.atlas))
+function Base.show(io::IO, mime::MIME"text/plain", μ::Hausdorff)
+    print(io, "Hausdorff")
+    return show(io, mime, (μ.manifold, μ.atlas))
 end
 
 Manifolds.base_manifold(μ::Hausdorff) = μ.manifold

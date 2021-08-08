@@ -14,8 +14,15 @@ LeftHaar(G) = Haar(G, LeftAction())
 const RightHaar{M} = Haar{M,RightAction}
 RightHaar(G) = Haar(G, RightAction())
 
-function Base.show(io::IO, ::MIME"text/plain", μ::Haar)
-    return print(io, "Haar", (μ.group, μ.direction))
+function Base.show(io::IO, mime::MIME"text/plain", μ::LeftHaar)
+    print(io, "LeftHaar(")
+    show(io, mime, base_manifold(μ))
+    return print(io, ")")
+end
+function Base.show(io::IO, mime::MIME"text/plain", μ::RightHaar)
+    print(io, "RightHaar(")
+    show(io, mime, base_manifold(μ))
+    return print(io, ")")
 end
 
 Manifolds.base_manifold(μ::Haar) = μ.group

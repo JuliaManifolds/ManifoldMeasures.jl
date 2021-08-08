@@ -16,7 +16,7 @@ include("bingham.jl")
 include("angularcentralgaussian.jl")
 
 # primitive
-export Hausdorff, Haar
+export Hausdorff, Haar, LeftHaar, RightHaar
 
 export AngularCentralGaussian, Bingham, Langevin, VonMisesFisher
 
