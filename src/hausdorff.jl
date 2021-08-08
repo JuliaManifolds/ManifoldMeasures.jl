@@ -33,7 +33,7 @@ LinearAlgebra.normalize(μ::Hausdorff) = Normalized(Hausdorff(base_manifold(μ))
 # drawn from the Hausdorff measure on St(n,k).
 # See Theorem 2.3.19 of Gupta AK, Nagar DK. Matrix variate distributions. CRC Press; 2018
 function Random.rand!(
-    rng::AbstractRNG, p::AbstractMatrix, ::Normalized{Hausdorff{<:Stiefel}}
+    rng::AbstractRNG, p::AbstractMatrix, ::Normalized{<:Hausdorff{<:Stiefel}}
 )
     randn!(rng, p)
     Q, _ = qr_unique!(p)
@@ -49,7 +49,7 @@ end
 # Grassmann
 
 function Random.rand!(
-    rng::AbstractRNG, p::AbstractMatrix, ::Normalized{Hausdorff{Grassmann{n,k,𝔽}}}
+    rng::AbstractRNG, p::AbstractMatrix, ::Normalized{<:Hausdorff{Grassmann{n,k,𝔽}}}
 ) where {n,k,𝔽}
     return rand!(rng, p, Hausdorff(Stiefel(n, k, 𝔽)))
 end
@@ -61,12 +61,12 @@ end
 # Sphere
 
 function Random.rand!(
-    rng::AbstractRNG, p::AbstractArray, μ::Normalized{Hausdorff{<:AbstractSphere}}
+    rng::AbstractRNG, p::AbstractArray, μ::Normalized{<:Hausdorff{<:AbstractSphere}}
 )
     return normalize!(randn!(rng, p))
 end
 
-function logmass(μ::Hausdorff{AbstractSphere{𝔽}}) where {𝔽}
+function logmass(μ::Hausdorff{<:AbstractSphere{𝔽}}) where {𝔽}
     n = manifold_dimension(base_manifold(μ))
     ν = number_dimension(𝔽) * (n + 1)//2
     return ν * log2π - loggamma(ν)
