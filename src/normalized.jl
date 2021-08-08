@@ -6,7 +6,7 @@ Compute the logarithm of the total mass of the measure `μ` over its manifold `M
 """
 function logmass end
 
-mass(μ) = MeasureTheory.Exp(-logmass(μ))
+mass(μ) = MeasureTheory.Exp(logmass(μ))
 
 # Warning! Type-piracy! ☠️
 LinearAlgebra.normalize(μ::AbstractMeasure) = mass(μ) * μ
