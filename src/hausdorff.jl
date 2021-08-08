@@ -68,8 +68,8 @@ end
 
 function logmass(μ::Hausdorff{<:AbstractSphere{𝔽}}) where {𝔽}
     n = manifold_dimension(base_manifold(μ))
-    ν = number_dimension(𝔽) * (n + 1)//2
-    return ν * log2π - loggamma(ν)
+    ν = real_dimension(𝔽) * (n + 1)//2
+    return logtwo + ν * logπ - loggamma(ν)
 end
 
 # ProjectiveSpace
