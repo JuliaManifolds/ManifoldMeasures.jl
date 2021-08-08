@@ -80,7 +80,18 @@ function Random.rand!(
     return normalize!(randn!(rng, p))
 end
 
-function logmass(μ::Hausdorff{AbstractProjectiveSpace{𝔽}}) where {𝔽}
+# because 𝔽ℙⁿ = 𝔽𝕊ⁿ / 𝔽𝕊⁰, then mass(𝔽ℙⁿ) = mass(𝔽𝕊ⁿ) / mass(𝔽𝕊⁰)
+function logmass(μ::Hausdorff{<:AbstractProjectiveSpace{ℝ}})
     n = manifold_dimension(μ)
-    return logmass(Hausdorff(Sphere(n, 𝔽))) - logmass(Hausdorff(Sphere(0, 𝔽)))
+    ν = (n + 1)//2
+    return ν * logπ + loggamma(ν)
+end
+function logmass(μ::Hausdorff{<:AbstractProjectiveSpace{ℂ}})
+    n = manifold_dimension(μ)
+    return n * logπ - logfactorial(n)
+end
+function logmass(μ::Hausdorff{<:AbstractProjectiveSpace{ℍ}})
+    n = manifold_dimension(μ)
+    return 2n * logπ - logfactorial(2n + 1)
+end
 end
