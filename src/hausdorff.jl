@@ -159,4 +159,24 @@ function logmass(μ::Hausdorff{<:AbstractProjectiveSpace{ℍ}})
     n = manifold_dimension(μ)
     return 2n * logπ - loggamma(2n)
 end
+
+# Rotations/SpecialOrthogonal
+
+function Random.rand!(
+    rng::AbstractRNG,
+    p::AbstractMatrix,
+    ::Normalized{<:Hausdorff{<:Union{Rotations,SpecialOrthogonal}}},
+)
+    # draw p ~ O(n)
+    rand!(rng, p, Hausdorff(Stiefel(n, n)))
+    # fix to p ~ SO(n)
+    if det(p) < 0
+        @views p[:, [1, 2]] = p[:, [2, 1]]
+    end
+    return p
+end
+
+# since O(n) = St(n,n) is essentially two copies of SO(n), then vol(SO(n)) = vol(St(n,n)) / 2
+function logmass(::Hausdorff{<:Union{Rotations{n},SpecialOrthogonal{n}}}) where {n}
+    return logmass(Hausdorff(Stiefel(n, n))) - logtwo
 end
