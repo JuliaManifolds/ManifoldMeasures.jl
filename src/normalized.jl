@@ -24,7 +24,9 @@ end
 MeasureTheory.basemeasure(μ::Normalized) = μ.base
 
 function MeasureTheory.logdensity(μ::Normalized, x)
-    return zero(eltype(x)) - logmass(basemeasure(μ))
+    ν = basemeasure(μ)
+    ℓ = float(logdensity(ν, x))
+    return ℓ - oftype(ℓ, logmass(ν))
 end
 
 logmass(μ::Normalized) = false
