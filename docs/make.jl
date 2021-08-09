@@ -15,7 +15,7 @@ makedocs(;
         canonical="https://JuliaManifolds.github.io/ManifoldMeasures.jl",
         assets=String[],
     ),
-    pages=["Home" => "index.md"],
+    pages=["Home" => "index.md", "Reference" => "reference.md"],
 )
 
 deploydocs(; repo="github.com/JuliaManifolds/ManifoldMeasures.jl", devbranch="main")
