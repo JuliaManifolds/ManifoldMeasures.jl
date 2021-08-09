@@ -10,7 +10,7 @@
 # This is the un-normalized Hausdorff measure, which integrates to the area/volume of M.
 
 """
-    Hausdorff{M<:AbstractManifold,A} <: PrimitiveMeasure
+    Hausdorff{M,A} <: PrimitiveMeasure
 
 The un-normalized Hausdorff measure on a manifold.
 
@@ -25,11 +25,11 @@ area/volume of that region in the embedded space.
 Constructs the Hausdorff measure for the manifold `M` using the default embedding of the
 manifold.
 """
-struct Hausdorff{M<:AbstractManifold,A} <: PrimitiveMeasure
+struct Hausdorff{M,A} <: PrimitiveMeasure
     manifold::M
     atlas::A  # optional, when the Hausdorff measure is constructed from a Lebesgue measure
 end
-Hausdorff(M::AbstractManifold) = Hausdorff(M, nothing)
+Hausdorff(M) = Hausdorff(M, nothing)
 
 function Base.show(io::IO, mime::MIME"text/plain", μ::Hausdorff)
     print(io, "Hausdorff")

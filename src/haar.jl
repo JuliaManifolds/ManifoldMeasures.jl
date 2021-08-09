@@ -4,7 +4,7 @@
 # on G.
 
 """
-    Haar{G<:AbstractManifold,D<:ActionDirection}
+    Haar{G,D}
 
 The Haar measure on a group manifold.
 
@@ -22,11 +22,11 @@ The convenient aliases [`LeftHaar`](@ref) and [`RightHaar`](@ref) are also provi
 
 Construct the `D`-invariant Haar measure on group manifold `G`.
 """
-struct Haar{G<:AbstractManifold,D<:ActionDirection} <: PrimitiveMeasure
+struct Haar{G,D} <: PrimitiveMeasure
     group::G
     direction::D
 end
-Haar(G::AbstractManifold) = Haar(G, LeftAction())
+Haar(G) = Haar(G, LeftAction())
 
 """
     LeftHaar{G<:AbstractManifold}
