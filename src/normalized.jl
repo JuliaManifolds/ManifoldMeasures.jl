@@ -31,4 +31,4 @@ logmass(μ::Normalized) = false
 
 LinearAlgebra.normalize(μ::Normalized) = μ
 # Warning! Type-piracy! ☠️
-LinearAlgebra.normalize(μ::AbstractMeasure) = Normalize(μ)
+LinearAlgebra.normalize(μ::AbstractMeasure) = Normalized(μ)
