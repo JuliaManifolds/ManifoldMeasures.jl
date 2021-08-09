@@ -1,3 +1,42 @@
+"""
+    VonMisesFisher(M; params...)
+
+The von Mises-Fisher (vMF) distribution on the `Sphere` or `Stiefel` manifold `M`.
+
+# Constructors
+
+    VonMisesFisher(M::AbstractSphere{𝔽}; c)
+    VonMisesFisher(M::AbstractSphere{𝔽}; μ, κ)
+
+Construct the vMF distribution on the `Sphere` parameterized either by the mean direction
+``μ ∈ 𝔽𝕊ⁿ`` and concentration ``κ ∈ ℝ⁺`` or by the single vector ``c = κμ``.
+
+The density of the vMF distribution on `Sphere(n, 𝔽)` with respect to the normalized
+Hausdorff measure is
+
+````math
+p(x | μ, κ) = \\frac{κ^{(n-1)/2}}{I_{(n-1)/2}(κ)} \\exp(κ \\Re(μ^\\mathrm{H} x)),
+````
+
+where ``I_ν(z)`` is the modified Bessel function of the first kind.
+
+    VonMisesFisher(M::Stiefel{n,k,𝔽}; F)
+    VonMisesFisher(M::Stiefel{n,k,𝔽}; M, D, Vt)
+
+Construct the (Matrix) vMF distribution on the `Stiefel(n,k,𝔽)` manifold parameterized
+either by the matrix ``F ∈ 𝔽^{n × k}`` or by its SVD decomposition ``F = M * D * Vt``.
+
+The density of the vMF distribution on `Stiefel(n, k, 𝔽)` with respect to the normalized
+Hausdorff measure is
+
+````math
+p(x | F) = \\frac{\\exp(\\Re(\\operatorname{tr}(F^\\mathrm{T} x)))}{_0 F_1(\\frac{n}{2}; \\frac{1}{4} F^\\mathrm{H}F)},
+````
+
+Note that even though `Stiefel(n+1,1,𝔽)` and `Sphere(n,𝔽)` are equivalent, their densities here
+are not equivalent for ``𝔽 ≠ ℝ``, because for the Stiefel manifold, the inner product without
+conjugation is used.
+"""
 struct VonMisesFisher{M,N,T} <: ParameterizedMeasure{N}
     manifold::M
     par::NamedTuple{N,T}
@@ -12,7 +51,6 @@ function MeasureTheory.basemeasure(μ::VonMisesFisher{<:Union{AbstractSphere,Sti
     return normalize(Hausdorff(base_manifold(μ)))
 end
 
-# parameterizations with c ∈ 𝔽ⁿ⁺¹ , where c = κ μ for μ ∈ 𝕊ⁿ, κ ∈ ℝ⁺
 function MeasureTheory.logdensity(
     d::VonMisesFisher{AbstractSphere,(:μ, :κ)}, x::AbstractArray
 )
@@ -34,7 +72,6 @@ function logvmfnorm(p, κ)
     return ifelse(iszero(κ), zero(lognorm), lognorm)
 end
 
-# parameterizations with F ∈ 𝔽ⁿˣᵏ whose SVD decomposition is F = M D Vt.
 function MeasureTheory.logdensity(
     d::VonMisesFisher{Stiefel{n,k},(:F,)}, x::AbstractMatrix
 ) where {n,k}

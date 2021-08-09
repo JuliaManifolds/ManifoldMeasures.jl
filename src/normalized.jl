@@ -2,7 +2,7 @@
     logmass(μ::AbstractMeasure)
 
 Compute the logarithm of the total mass of the measure `μ` over its manifold `M`, that is
-`μ(M) = ∫_M dμ(x)`.
+``μ(M) = ∫_M \\mathrm{d}μ(x)``.
 """
 function logmass end
 

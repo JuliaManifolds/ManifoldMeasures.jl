@@ -8,6 +8,23 @@
 # dμ(x) = det(G(x))^(-1/2) dλ(f⁻¹(x)), where G(x) is the matrix representation of the metric tensor
 # in M, given by G(x) = J(x)ᵀ J(x), where J is the Jacobian of f.
 # This is the un-normalized Hausdorff measure, which integrates to the area/volume of M.
+
+"""
+    Hausdorff{M<:AbstractManifold,A} <: PrimitiveMeasure
+
+The un-normalized Hausdorff measure on a manifold.
+
+The Hausdorff measure generalizes the notion of area or volume to a manifold that is embedded
+in a metric space. That is, the mass of the measure over some region of the manifold is the
+area/volume of that region in the embedded space.
+
+# Constructors
+
+    Hausdorff(M::AbstractManifold)
+
+Constructs the Hausdorff measure for the manifold `M` using the default embedding of the
+manifold.
+"""
 struct Hausdorff{M<:AbstractManifold,A} <: PrimitiveMeasure
     manifold::M
     atlas::A  # optional, when the Hausdorff measure is constructed from a Lebesgue measure

@@ -1,5 +1,25 @@
-const ACGManifolds = Union{Sphere,ProjectiveSpace,Stiefel,Grassmann}
+const ACGManifolds = Union{Sphere,ProjectiveSpace,Stiefel,Grassmann,Rotations,SpecialOrthogonal}
 
+"""
+    AngularCentralGaussian(M; params...)
+
+The Angular Central Gaussian (ACG) distribution on the manifold ``M``.
+
+Accepted manifolds are `Sphere`, `ProjectiveSpace`, `Stiefel`, `Grassmann`, `Rotations`
+and `SpecialOrthogonal`.
+
+For manifolds with matrix points, this is also called the Matrix Angular Central Gaussian
+distribution.
+
+# Constructors
+
+    AngularCentralGaussian(M; Σ⁻¹)
+    AngularCentralGaussian(M; L)
+
+For a manifold ``M ⊂ 𝔽^{n × k}``, construct the ACG distribution parameterized either by
+the inverse of an ``n × n`` positive definite matrix ``Σ`` or by its lower Cholesky factor
+``L``, such that ``Σ = L L^\\mathrm{T}``.
+"""
 struct AngularCentralGaussian{M,N,T} <: ParameterizedMeasure{N}
     manifold::M
     par::NamedTuple{N,T}

@@ -1,5 +1,31 @@
-const BinghamManifolds = Union{Sphere,ProjectiveSpace,Stiefel,Grassmann}
+const BinghamManifolds = Union{Sphere,ProjectiveSpace,Stiefel,Grassmann,Rotations,SpecialOrthogonal}
 
+"""
+    Bingham(M; params...)
+
+The Bingham distribution on the manifold ``M``.
+
+Accepted manifolds are `Sphere`, `ProjectiveSpace`, `Stiefel`, `Grassmann`, `Rotations`
+and `SpecialOrthogonal`.
+
+For manifolds with matrix points, this is also called the Matrix Bingham distribution.
+
+# Constructors
+
+    Bingham(M; B)
+
+For a manifold ``M ⊂ 𝔽^{n × k}``, construct the Bingham distribution parameterized by
+``B ∈ 𝔽^{n × k}``.
+
+The density function with respect to the normalized [`Hausdorff`](@ref) measure on ``M`` is
+
+````math
+p(x | B) = \\frac{\\exp(⟨x, Bx⟩)}{_1 F_1(\\frac{k}{2}, \\frac{n}{2}; B)},
+````
+
+where ``⟨⋅,⋅⟩`` is the Frobenius inner product, and ``_1 F_1(a, b; B)``
+is hypergeometric function with matrix arguments.
+"""
 struct Bingham{M,N,T} <: ParameterizedMeasure{N}
     manifold::M
     par::NamedTuple{N,T}
