@@ -6,10 +6,8 @@ Compute the logarithm of the total mass of the measure `μ` over its manifold `M
 """
 function logmass end
 
-mass(μ) = MeasureTheory.Exp(logmass(μ))
-
-# Warning! Type-piracy! ☠️
-LinearAlgebra.normalize(μ::AbstractMeasure) = mass(μ) * μ
+# TODO: use some exponential wrapper
+mass(μ) = exp(logmass(μ))
 
 struct Normalized{M} <: AbstractMeasure
     base::M
@@ -32,3 +30,5 @@ end
 logmass(μ::Normalized) = false
 
 LinearAlgebra.normalize(μ::Normalized) = μ
+# Warning! Type-piracy! ☠️
+LinearAlgebra.normalize(μ::AbstractMeasure) = Normalize(μ)

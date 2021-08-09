@@ -23,8 +23,6 @@ Manifolds.base_manifold(μ::Hausdorff) = μ.manifold
 
 MeasureTheory.logdensity(::Hausdorff, x) = zero(eltype(x))
 
-LinearAlgebra.normalize(μ::Hausdorff) = Normalized(Hausdorff(base_manifold(μ)))
-
 # Stiefel
 
 # In general, given matrix z ∈ 𝔽^(n × k) with IID std normal elements, p=z(z'z)^(-1/2) is drawn
