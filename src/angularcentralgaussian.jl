@@ -22,8 +22,11 @@ struct AngularCentralGaussian{M,N,T} <: ParameterizedMeasure{N}
     manifold::M
     par::NamedTuple{N,T}
 end
-
 AngularCentralGaussian(M; params...) = AngularCentralGaussian(M, NamedTuple(params))
+
+function Base.show(io::IO, mime::MIME"text/plain", μ::AngularCentralGaussian)
+    return show_manifold_measure(io, mime, μ)
+end
 
 Manifolds.base_manifold(d::AngularCentralGaussian) = getfield(d, :manifold)
 

@@ -30,6 +30,10 @@ struct Bingham{M,N,T} <: ParameterizedMeasure{N}
 end
 Bingham(M; params...) = Bingham(M, NamedTuple(params))
 
+function Base.show(io::IO, mime::MIME"text/plain", μ::Bingham)
+    return show_manifold_measure(io, mime, μ)
+end
+
 Manifolds.base_manifold(d::Bingham) = getfield(d, :manifold)
 
 function MeasureTheory.basemeasure(μ::Bingham)

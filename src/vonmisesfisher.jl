@@ -48,6 +48,10 @@ VonMisesFisher(M; params...) = VonMisesFisher(M, NamedTuple(params))
 
 const Langevin = VonMisesFisher
 
+function Base.show(io::IO, mime::MIME"text/plain", μ::VonMisesFisher)
+    return show_manifold_measure(io, mime, μ)
+end
+
 Manifolds.base_manifold(d::VonMisesFisher) = getfield(d, :manifold)
 
 function MeasureTheory.basemeasure(μ::VonMisesFisher)
