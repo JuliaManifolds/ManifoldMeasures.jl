@@ -40,6 +40,11 @@ Manifolds.base_manifold(μ::Hausdorff) = μ.manifold
 
 MeasureTheory.logdensity(::Hausdorff, x) = zero(eltype(x))
 
+function Base.rand(rng::AbstractRNG, T, μ::Normalized{<:Hausdorff})
+    p = default_point(μ, T)
+    return Random.rand!(rng, p, μ)
+end
+
 # Stiefel
 
 # In general, given matrix z ∈ 𝔽^(n × k) with IID std normal elements, p=z(z'z)^(-1/2) is drawn

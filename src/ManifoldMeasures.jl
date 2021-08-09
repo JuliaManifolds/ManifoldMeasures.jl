@@ -1,8 +1,28 @@
 module ManifoldMeasures
 
 using KeywordCalls,
-    LinearAlgebra, Manifolds, MeasureTheory, Random, SpecialFunctions, StatsFuns
+    LinearAlgebra,
+    Manifolds,
+    MeasureTheory,
+    Random,
+    SpecialFunctions,
+    StaticArrays,
+    StatsFuns
 using Manifolds: ℝ
+
+const MAX_LENGTH_SIZED = 100
+
+# experimental implementation of Option 3 in
+# https://github.com/cscherrer/MeasureTheory.jl/issues/129#issue-962733685
+default_number_type(::typeof(ℝ), T) = real(T)
+default_number_type(::typeof(ℂ), T) = complex(real(T))
+
+function default_point(μ, ::Type{S}) where {S}
+    M = base_manifold(μ)
+    T = default_number_type(number_system(M), S)
+    sz = representation_size(M)
+    return prod(sz) ≤ MAX_LENGTH_SIZED ? MArray{Tuple{sz...},T}(undef) : Array{T}(undef, sz)
+end
 
 Manifolds.base_manifold(μ::AbstractMeasure) = base_manifold(basemeasure(μ))
 

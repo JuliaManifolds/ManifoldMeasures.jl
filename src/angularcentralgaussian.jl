@@ -49,6 +49,11 @@ function MeasureTheory.logdensity(d::AngularCentralGaussian{M,(:L,)}, x) where {
     return -k * real(logdet(L)) - n * log(norm(L \ x))
 end
 
+function Base.rand(rng, T, d::AngularCentralGaussian)
+    p = default_point(d, T)
+    return Random.rand!(rng, p, d)
+end
+
 function Random.rand!(
     rng::AbstractRNG, p::AbstractArray, d::AngularCentralGaussian{M,(:L,)}
 ) where {M}
