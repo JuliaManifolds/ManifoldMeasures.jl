@@ -49,9 +49,8 @@ function MeasureTheory.logdensity(
 )
     s = representation_size(base_manifold(d))
     n, k = length(s) == 1 ? (first(s), 1) : s
-    L = d.L
-    z = LowerTriangular(L) \ x
-    return -n//2 * log(real(dot(z, z))) - k * real(logdet(L))
+    L = LowerTriangular(d.L)
+    return -n * log(norm(L \ x)) - k * real(logdet(L))
 end
 
 function Random.rand!(
