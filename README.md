@@ -1,5 +1,6 @@
 # ManifoldMeasures
 
+![Lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaManifolds.github.io/ManifoldMeasures.jl/stable)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://JuliaManifolds.github.io/ManifoldMeasures.jl/dev)
 [![Build Status](https://github.com/JuliaManifolds/ManifoldMeasures.jl/workflows/CI/badge.svg)](https://github.com/JuliaManifolds/ManifoldMeasures.jl/actions)
