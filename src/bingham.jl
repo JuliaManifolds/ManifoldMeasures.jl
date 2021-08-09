@@ -1,4 +1,6 @@
-const BinghamManifolds = Union{Sphere,ProjectiveSpace,Stiefel,Grassmann,Rotations,SpecialOrthogonal}
+const BinghamManifolds = Union{
+    Sphere,ProjectiveSpace,Stiefel,Grassmann,Rotations,SpecialOrthogonal
+}
 
 """
     Bingham(M; params...)
@@ -19,9 +21,9 @@ For a manifold ``M ⊂ 𝔽^{n × k}``, construct the Bingham distribution param
 
 The density function with respect to the normalized [`Hausdorff`](@ref) measure on ``M`` is
 
-````math
+```math
 p(x | B) = \\frac{\\exp(⟨x, Bx⟩)}{_1 F_1(\\frac{k}{2}, \\frac{n}{2}; B)},
-````
+```
 
 where ``⟨⋅,⋅⟩`` is the Frobenius inner product, and ``_1 F_1(a, b; B)``
 is hypergeometric function with matrix arguments.

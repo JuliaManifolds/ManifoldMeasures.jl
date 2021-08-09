@@ -1,4 +1,6 @@
-const ACGManifolds = Union{Sphere,ProjectiveSpace,Stiefel,Grassmann,Rotations,SpecialOrthogonal}
+const ACGManifolds = Union{
+    Sphere,ProjectiveSpace,Stiefel,Grassmann,Rotations,SpecialOrthogonal
+}
 
 """
     AngularCentralGaussian(M; params...)

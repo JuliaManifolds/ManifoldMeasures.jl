@@ -14,9 +14,9 @@ Construct the vMF distribution on the `Sphere` parameterized either by the mean 
 The density of the vMF distribution on `Sphere(n, 𝔽)` with respect to the normalized
 Hausdorff measure is
 
-````math
+```math
 p(x | μ, κ) = \\frac{κ^{(n-1)/2}}{I_{(n-1)/2}(κ)} \\exp(κ \\Re(μ^\\mathrm{H} x)),
-````
+```
 
 where ``I_ν(z)`` is the modified Bessel function of the first kind.
 
@@ -29,9 +29,9 @@ either by the matrix ``F ∈ 𝔽^{n × k}`` or by its SVD decomposition ``F = M
 The density of the vMF distribution on `Stiefel(n, k, 𝔽)` with respect to the normalized
 Hausdorff measure is
 
-````math
+```math
 p(x | F) = \\frac{\\exp(\\Re(\\operatorname{tr}(F^\\mathrm{T} x)))}{_0 F_1(\\frac{n}{2}; \\frac{1}{4} F^\\mathrm{H}F)},
-````
+```
 
 Note that even though `Stiefel(n+1,1,𝔽)` and `Sphere(n,𝔽)` are equivalent, their densities here
 are not equivalent for ``𝔽 ≠ ℝ``, because for the Stiefel manifold, the inner product without
@@ -82,5 +82,6 @@ function MeasureTheory.logdensity(
     d::VonMisesFisher{Stiefel{n,k},(:M, :D, :Vt)}, x::AbstractMatrix
 ) where {n,k}
     D = d.D
-    return real(dotu(D .* d.Vt, transpose(d.M') * x)) - logpFq((), (n//2,), Diagonal((D .^ 2) ./ 4))
+    return real(dotu(D .* d.Vt, transpose(d.M') * x)) -
+           logpFq((), (n//2,), Diagonal((D .^ 2) ./ 4))
 end
