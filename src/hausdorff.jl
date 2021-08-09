@@ -49,22 +49,22 @@ end
 function logmass(::Hausdorff{Stiefel{n,k,ℂ}}) where {n,k}
     a = n - k
     lfact = logfactorial(a)
-    lm = k * logtwo + (k * (2n - k + 1) // 2) * logπ + lfact
-    for _ in 1:(k-1)
+    lm = k * logtwo + (k * (2n - k + 1)//2) * logπ - lfact
+    for _ in 1:(k - 1)
         a += 1
         lfact += log(a)
-        lm += lfact
+        lm -= lfact
     end
     return lm
 end
 function logmass(::Hausdorff{Stiefel{n,k,ℍ}}) where {n,k}
     a = 2(n - k) + 1
-    lfact = k * logtwo + (k * (a + k)) * logπ + logfactorial(a)
-    lm = lfact
+    lfact = logfactorial(a)
+    lm = k * logtwo + (k * (a + k)) * logπ - lfact
     for _ in 1:(k - 1)
         a += 2
         lfact += log(a) + log(a - 1)
-        lm += lfact
+        lm -= lfact
     end
     return lm
 end
@@ -81,22 +81,19 @@ end
 # then vol(Gr(n,k,𝔽)) = vol(St(n,k,𝔽)) / vol(St(k,k,𝔽))
 #                     = π^(k((n-k)d/2)) ∏ᵢ₌₁ᵏ Γ(id/2) / Γ((n-k)d/2 + id/2),
 # where d = real_dimension(𝔽)
-function logmass(::Hausdorff{Grassmann{n,k,𝔽}}) where {n,k,𝔽}
-    return logmass(Hausdorff(Stiefel(n, k, 𝔽))) - logmass(Hausdorff(Stiefel(k, k, 𝔽)))
-end
 function logmass(::Hausdorff{Grassmann{n,k,ℝ}}) where {n,k}
-    return k*(n - k)//2 * logπ + logmvgamma(k, k//2) - logmvgamma(k, n//2)    
+    return k * (n - k)//2 * logπ + logmvgamma(k, k//2) - logmvgamma(k, n//2)
 end
 function logmass(::Hausdorff{Grassmann{n,k,ℂ}}) where {n,k}
     a = n - k
     lfact1 = logfactorial(a)
     lfact2 = log(1)
-    lm = k*a * logπ + lfact1 - lfact2
-    for i in 1:(k-1)
+    lm = k * a * logπ + lfact2 - lfact1
+    for i in 1:(k - 1)
         a += 1
         lfact1 += log(a)
         lfact2 += log(i)
-        lm += lfact1 - lfact2
+        lm += lfact2 - lfact1
     end
     return lm
 end
@@ -105,13 +102,13 @@ function logmass(::Hausdorff{Grassmann{n,k,ℍ}}) where {n,k}
     b = 1
     lfact1 = logfactorial(a)
     lfact2 = log(b)
-    lm = 2*k*(n-k) * logπ + lfact1 - lfact2
-    for _ in 1:(k-1)
+    lm = 2 * k * (n - k) * logπ + lfact2 - lfact1
+    for _ in 1:(k - 1)
         a += 2
         b += 2
-        lfact1 += log(a) + log(a-1)
-        lfact2 += log(b) + log(b-1)
-        lm += lfact1 - lfact2
+        lfact1 += log(a) + log(a - 1)
+        lfact2 += log(b) + log(b - 1)
+        lm += lfact2 - lfact1
     end
     return lm
 end
@@ -124,14 +121,9 @@ function Random.rand!(
     return normalize!(randn!(rng, p))
 end
 
-function logmass(μ::Hausdorff{<:AbstractSphere{ℝ}})
-    n = manifold_dimension(base_manifold(μ))
-    ν = (n + 1)//2
-    return logtwo + ν * logπ - loggamma(ν)
-end
 function logmass(μ::Hausdorff{<:AbstractSphere{𝔽}}) where {𝔽}
-    n = manifold_dimension(base_manifold(μ))
-    ν = div(real_dimension(𝔽) * (n + 1), 2)
+    m = prod(representation_size(base_manifold(μ)))
+    ν = real_dimension(𝔽) * m//2
     return logtwo + ν * logπ - loggamma(ν)
 end
 
@@ -145,17 +137,19 @@ end
 
 # because 𝔽ℙⁿ = 𝔽𝕊ⁿ / 𝔽𝕊⁰, then vol(𝔽ℙⁿ) = vol(𝔽𝕊ⁿ) / vol(𝔽𝕊⁰)
 function logmass(μ::Hausdorff{<:AbstractProjectiveSpace{ℝ}})
-    n = manifold_dimension(μ)
-    ν = (n + 1)//2
-    return ν * logπ + loggamma(ν)
+    m = prod(representation_size(base_manifold(μ)))
+    ν = m//2
+    return ν * logπ - loggamma(ν)
 end
 function logmass(μ::Hausdorff{<:AbstractProjectiveSpace{ℂ}})
-    n = manifold_dimension(μ)
+    m = prod(representation_size(base_manifold(μ)))
+    n = m - 1
     return n * logπ - logfactorial(n)
 end
 function logmass(μ::Hausdorff{<:AbstractProjectiveSpace{ℍ}})
-    n = manifold_dimension(μ)
-    return 2n * logπ - loggamma(2n)
+    m = prod(representation_size(base_manifold(μ)))
+    n = m - 1
+    return 2n * logπ - loggamma(2(n + 1))
 end
 
 # Rotations/SpecialOrthogonal
