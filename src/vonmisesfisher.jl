@@ -62,7 +62,7 @@ function MeasureTheory.logdensity(d::VonMisesFisher{AbstractSphere,(:c,)}, x::Ab
     p = manifold_dimension(base_manifold(d)) + 1
     c = d.c
     κ = norm(c)
-    return real(dotu(c, x)) - logvmfnorm(p, κ)
+    return real(dot(c, x)) - logvmfnorm(p, κ)
 end
 
 # TODO: handle potential under/overflow
@@ -82,5 +82,5 @@ function MeasureTheory.logdensity(
     d::VonMisesFisher{Stiefel{n,k},(:M, :D, :Vt)}, x::AbstractMatrix
 ) where {n,k}
     D = d.D
-    return real(dotu(D .* d.Vt, d.M' * x)) - logpFq((), (n//2,), Diagonal((D .^ 2) ./ 4))
+    return real(dotu(D .* d.Vt, transpose(d.M') * x)) - logpFq((), (n//2,), Diagonal((D .^ 2) ./ 4))
 end
