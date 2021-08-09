@@ -65,12 +65,12 @@ function MeasureTheory.logdensity(d::VonMisesFisher{M,(:c,)}, x) where {M}
     return real(dot(c, x)) - logvmfnorm(p, norm(c))
 end
 function MeasureTheory.logdensity(d::VonMisesFisher{M,(:F,)}, x) where {M}
-    n = first(representation_size(base_manifold(M)))
+    n = size(x, 1)
     F = d.F
     return real(dot(F, x)) - logpFq((), (n//2,), (F'F) / 4)
 end
 function MeasureTheory.logdensity(d::VonMisesFisher{M,(:M, :D, :Vt)}, x) where {M}
-    n = first(representation_size(base_manifold(M)))
+    n = size(x, 1)
     D = d.D
     return real(dot(D .* d.Vt, d.M' * x)) - logpFq((), (n//2,), Diagonal((D .^ 2) ./ 4))
 end
