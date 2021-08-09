@@ -1,12 +1,12 @@
-function qr_unique!(A::AbstractMatrix)
+function qr_unique!(A)
     Q, R = qr(A)
-    Rdiag = @views R[diagind(R)]
-    A .= Matrix(Q) .* sign.(transpose(Rdiag))
-    R .*= sign.(Rdiag)
+    s = @views sign.(real.(R[diagind(R)]))
+    A .= Q .* s'
+    R .*= s
     return A, R
 end
 
-function svd_unique(A::AbstractMatrix)
+function svd_unique(A)
     F = svd(A)
     U = F.U
     U1 = @view U[1, :]

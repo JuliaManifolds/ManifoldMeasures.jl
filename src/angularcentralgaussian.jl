@@ -49,7 +49,7 @@ function MeasureTheory.logdensity(d::AngularCentralGaussian{M,(:L,)}, x) where {
     return -k * real(logdet(L)) - n * log(norm(L \ x))
 end
 
-function Base.rand(rng, T, d::AngularCentralGaussian)
+function Base.rand(rng::AbstractRNG, T::Type, d::AngularCentralGaussian)
     p = default_point(d, T)
     return Random.rand!(rng, p, d)
 end
@@ -58,6 +58,5 @@ function Random.rand!(
     rng::AbstractRNG, p::AbstractArray, d::AngularCentralGaussian{M,(:L,)}
 ) where {M}
     z = randn!(rng, p)
-    y = lmul!(LowerTriangular(d.L), z)
-    return project!(base_manifold(d), p, y)
+    return project!(base_manifold(d), p, d.L * z)
 end
