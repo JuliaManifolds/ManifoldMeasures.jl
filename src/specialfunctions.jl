@@ -1,3 +1,5 @@
+logbesseli(ν, x) = log(besseli(ν, x))
+
 # hypergeometric functions with matrix arguments
 pFq((), (), x) = exp(tr(x)) # ₀F₀
 # TODO: Implement ₀F₁
