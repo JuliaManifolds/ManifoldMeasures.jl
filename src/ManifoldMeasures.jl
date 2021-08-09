@@ -6,7 +6,6 @@ using Manifolds: ℝ
 
 Manifolds.base_manifold(μ::AbstractMeasure) = base_manifold(basemeasure(μ))
 
-include("utils.jl")
 include("specialfunctions.jl")
 include("factorizations.jl")
 include("normalized.jl")

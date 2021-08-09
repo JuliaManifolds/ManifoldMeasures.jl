@@ -1,7 +1,3 @@
-const ACGManifolds = Union{
-    Sphere,ProjectiveSpace,Stiefel,Grassmann,Rotations,SpecialOrthogonal
-}
-
 """
     AngularCentralGaussian(M; params...)
 
@@ -27,35 +23,32 @@ struct AngularCentralGaussian{M,N,T} <: ParameterizedMeasure{N}
     par::NamedTuple{N,T}
 end
 
-AngularCentralGaussian(M; kwargs...) = AngularCentralGaussian(M, NamedTuple(kwargs))
+AngularCentralGaussian(M; params...) = AngularCentralGaussian(M, NamedTuple(params))
 
 Manifolds.base_manifold(d::AngularCentralGaussian) = getfield(d, :manifold)
 
-function MeasureTheory.basemeasure(μ::AngularCentralGaussian{<:ACGManifolds})
+function MeasureTheory.basemeasure(μ::AngularCentralGaussian)
     return normalize(Hausdorff(base_manifold(μ)))
 end
 
 # Chikuse, 2003 Eq. 2.4.3
-function MeasureTheory.logdensity(
-    d::AngularCentralGaussian{<:ACGManifolds,(:Σ⁻¹,)}, x::AbstractArray
-)
-    s = representation_size(base_manifold(d))
-    n, k = length(s) == 1 ? (first(s), 1) : s
+# TODO: check exponents for complex case, see https://arxiv.org/abs/2010.03243
+function MeasureTheory.logdensity(d::AngularCentralGaussian{M,(:Σ⁻¹,)}, x) where {M}
+    n = size(x, 1)
+    k = size(x, 2)
     Σ⁻¹ = d.Σ⁻¹
-    return -n//2 * log(real(dot(x, Σ⁻¹, x))) + k//2 * real(logdet(Σ⁻¹))
+    return (k * real(logdet(Σ⁻¹)) - n * log(real(dot(x, Σ⁻¹, x)))) / 2
 end
-function MeasureTheory.logdensity(
-    d::AngularCentralGaussian{<:ACGManifolds,(:L,)}, x::AbstractArray
-)
-    s = representation_size(base_manifold(d))
-    n, k = length(s) == 1 ? (first(s), 1) : s
+function MeasureTheory.logdensity(d::AngularCentralGaussian{M,(:L,)}, x) where {M}
+    n = size(x, 1)
+    k = size(x, 2)
     L = LowerTriangular(d.L)
-    return -n * log(norm(L \ x)) - k * real(logdet(L))
+    return -k * real(logdet(L)) - n * log(norm(L \ x))
 end
 
 function Random.rand!(
-    rng::AbstractRNG, p::AbstractArray, d::AngularCentralGaussian{<:ACGManifolds,(:L,)}
-)
+    rng::AbstractRNG, p::AbstractArray, d::AngularCentralGaussian{M,(:L,)}
+) where {M}
     z = randn!(rng, p)
     y = lmul!(LowerTriangular(d.L), z)
     return project!(base_manifold(d), p, y)

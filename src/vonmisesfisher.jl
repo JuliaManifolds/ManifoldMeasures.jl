@@ -1,7 +1,8 @@
 """
     VonMisesFisher(M; params...)
 
-The von Mises-Fisher (vMF) distribution on the `Sphere` or `Stiefel` manifold `M`.
+The von Mises-Fisher (vMF) distribution on the `Sphere`, `Stiefel`, `Rotations`,
+or `SpecialOrthogonal` manifold `M`.
 
 # Constructors
 
@@ -15,10 +16,11 @@ The density of the vMF distribution on `Sphere(n, 𝔽)` with respect to the nor
 Hausdorff measure is
 
 ```math
-p(x | μ, κ) = \\frac{κ^{(n-1)/2}}{I_{(n-1)/2}(κ)} \\exp(κ \\Re(μ^\\mathrm{H} x)),
+p(x | μ, κ) = \\frac{κ^{(n-1)/2}}{I_{(n-1)/2}(κ)} \\exp(κ \\Re⟨μ, x⟩)),
 ```
 
-where ``I_ν(z)`` is the modified Bessel function of the first kind.
+where ``⟨⋅,⋅⟩`` is the Frobenius inner product, and ``I_ν(z)`` is the modified Bessel
+function of the first kind.
 
     VonMisesFisher(M::Stiefel{n,k,𝔽}; F)
     VonMisesFisher(M::Stiefel{n,k,𝔽}; M, D, Vt)
@@ -26,43 +28,51 @@ where ``I_ν(z)`` is the modified Bessel function of the first kind.
 Construct the (Matrix) vMF distribution on the `Stiefel(n,k,𝔽)` manifold parameterized
 either by the matrix ``F ∈ 𝔽^{n × k}`` or by its SVD decomposition ``F = M * D * Vt``.
 
+Because `Stiefel(n, n) = \\mathrm{SO}(n)`, these constructors also apply to `Rotations(n)`
+and `SpecialOrthogonal(n)`.
+
 The density of the vMF distribution on `Stiefel(n, k, 𝔽)` with respect to the normalized
 Hausdorff measure is
 
 ```math
-p(x | F) = \\frac{\\exp(\\Re(\\operatorname{tr}(F^\\mathrm{T} x)))}{_0 F_1(\\frac{n}{2}; \\frac{1}{4} F^\\mathrm{H}F)},
+p(x | F) = \\frac{\\exp(\\Re⟨F, x⟩)}{_0 F_1(\\frac{n}{2}; \\frac{1}{4} F^\\mathrm{H}F)},
 ```
 
-Note that even though `Stiefel(n+1,1,𝔽)` and `Sphere(n,𝔽)` are equivalent, their densities here
-are not equivalent for ``𝔽 ≠ ℝ``, because for the Stiefel manifold, the inner product without
-conjugation is used.
+where ``_0 F_1(b; B)`` is a hypergeometric function with matrix argument ``B``.
 """
 struct VonMisesFisher{M,N,T} <: ParameterizedMeasure{N}
     manifold::M
     par::NamedTuple{N,T}
 end
-VonMisesFisher(M::AbstractManifold; kwargs...) = VonMisesFisher(M, NamedTuple(kwargs))
+VonMisesFisher(M; params...) = VonMisesFisher(M, NamedTuple(params))
 
 const Langevin = VonMisesFisher
 
 Manifolds.base_manifold(d::VonMisesFisher) = getfield(d, :manifold)
 
-function MeasureTheory.basemeasure(μ::VonMisesFisher{<:Union{AbstractSphere,Stiefel}})
+function MeasureTheory.basemeasure(μ::VonMisesFisher)
     return normalize(Hausdorff(base_manifold(μ)))
 end
 
-function MeasureTheory.logdensity(
-    d::VonMisesFisher{AbstractSphere,(:μ, :κ)}, x::AbstractArray
-)
-    p = manifold_dimension(base_manifold(d)) + 1
+function MeasureTheory.logdensity(d::VonMisesFisher{M,(:μ, :κ)}, x) where {M}
+    p = length(x)
     κ = d.κ
     return κ * real(dot(d.μ, x)) - logvmfnorm(p, κ)
 end
-function MeasureTheory.logdensity(d::VonMisesFisher{AbstractSphere,(:c,)}, x::AbstractArray)
-    p = manifold_dimension(base_manifold(d)) + 1
+function MeasureTheory.logdensity(d::VonMisesFisher{M,(:c,)}, x) where {M}
+    p = length(x)
     c = d.c
-    κ = norm(c)
-    return real(dot(c, x)) - logvmfnorm(p, κ)
+    return real(dot(c, x)) - logvmfnorm(p, norm(c))
+end
+function MeasureTheory.logdensity(d::VonMisesFisher{M,(:F,)}, x) where {M}
+    n = first(representation_size(base_manifold(M)))
+    F = d.F
+    return real(dot(F, x)) - logpFq((), (n//2,), (F'F) / 4)
+end
+function MeasureTheory.logdensity(d::VonMisesFisher{M,(:M, :D, :Vt)}, x) where {M}
+    n = first(representation_size(base_manifold(M)))
+    D = d.D
+    return real(dot(D .* d.Vt, d.M' * x)) - logpFq((), (n//2,), Diagonal((D .^ 2) ./ 4))
 end
 
 # TODO: handle potential under/overflow
@@ -70,18 +80,4 @@ function logvmfnorm(p, κ)
     ν = p//2 - 1
     lognorm = ν * log(κ) - logbesseli(ν, κ)
     return ifelse(iszero(κ), zero(lognorm), lognorm)
-end
-
-function MeasureTheory.logdensity(
-    d::VonMisesFisher{Stiefel{n,k},(:F,)}, x::AbstractMatrix
-) where {n,k}
-    F = d.F
-    return real(dotu(F, x)) - logpFq((), (n//2,), rmul!(F'F, 1//4))
-end
-function MeasureTheory.logdensity(
-    d::VonMisesFisher{Stiefel{n,k},(:M, :D, :Vt)}, x::AbstractMatrix
-) where {n,k}
-    D = d.D
-    return real(dotu(D .* d.Vt, transpose(d.M') * x)) -
-           logpFq((), (n//2,), Diagonal((D .^ 2) ./ 4))
 end
