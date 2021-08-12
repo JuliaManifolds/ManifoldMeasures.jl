@@ -7,6 +7,7 @@ using KeywordCalls,
     Random,
     SpecialFunctions,
     StaticArrays,
+    StatsBase,
     StatsFuns
 using Manifolds: ℝ
 
