@@ -43,6 +43,6 @@ export Normalized, Hausdorff, Haar, LeftHaar, RightHaar
 
 export AngularCentralGaussian, Bingham, Fisher, Langevin, VonMises, VonMisesFisher
 
-export normalize
+export mode, normalize
 
 end

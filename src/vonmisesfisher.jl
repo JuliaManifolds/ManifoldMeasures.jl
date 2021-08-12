@@ -122,6 +122,12 @@ function MeasureTheory.logdensity(d::VonMisesFisher{M,(:H, :P)}, x) where {M}
     return real(dot(d.H, P, x)) - logpFq((), (n//2,), (P^2) / 4)
 end
 
+StatsBase.mode(d::VonMisesFisher{<:Any,(:μ, :κ)}) = d.μ
+StatsBase.mode(d::VonMisesFisher{<:Any,(:c)}) = normalize(d.c)
+StatsBase.mode(d::VonMisesFisher{<:Any,(:F)}) = (F = svd(d.F); F.U * F.Vt)
+StatsBase.mode(d::VonMisesFisher{<:Any,(:U, :D, :V)}) = d.U * d.V'
+StatsBase.mode(d::VonMisesFisher{<:Any,(:H, :P)}) = d.H
+
 # ₀F₁(p//2; κ²/4) = 2ᵛ Iᵥ(κ) / κᵛ / Γ(v + 1) for v = p/2 - 1
 # Note that the usual vMF constant Cₚ(κ) is defined wrt the un-normalized Hausdorff
 # measure, whereas we use the normalized Hausdorff measure here.
