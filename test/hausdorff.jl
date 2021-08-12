@@ -16,6 +16,11 @@ using Manifolds: ℝ
     end
 
     @testset "manifolds" begin
+        @testset "Circle" begin
+            @test mass(Hausdorff(Circle(ℝ))) ≈ 2π
+            @test mass(Hausdorff(Circle(ℂ))) ≈ 2π
+        end
+
         @testset "Sphere" begin
             @test mass(Hausdorff(Sphere(0))) ≈ 2
             @test mass(Hausdorff(Sphere(1))) ≈ 2π

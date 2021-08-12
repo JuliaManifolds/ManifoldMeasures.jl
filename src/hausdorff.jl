@@ -135,6 +135,20 @@ function logmass(::Hausdorff{Grassmann{n,k,ℍ}}) where {n,k}
     return lm
 end
 
+# Circle
+
+default_point(::Normalized{<:Hausdorff{Circle{ℝ}}}, T) = zero(float(real(T)))
+default_point(::Normalized{<:Hausdorff{Circle{ℂ}}}, T) = zero(complex(float(real(T))))
+
+function Random.rand!(rng::AbstractRNG, p::Real, ::Normalized{<:Hausdorff{Circle{ℝ}}})
+    return rand(rng, typeof(p)) * twoπ - π
+end
+function Random.rand!(rng::AbstractRNG, p::Complex, ::Normalized{<:Hausdorff{Circle{ℂ}}})
+    return sign(randn(rng, typeof(p)))
+end
+
+logmass(::Hausdorff{<:Circle}) = log2π
+
 # Sphere
 
 function Random.rand!(
