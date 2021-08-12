@@ -59,14 +59,15 @@ function MeasureTheory.basemeasure(μ::VonMisesFisher)
 end
 
 function MeasureTheory.logdensity(d::VonMisesFisher{M,(:μ, :κ)}, x) where {M}
-    p = length(x)
+    p = size(x, 1)
     κ = d.κ
-    return κ * real(dot(d.μ, x)) - logvmfnorm(p, κ)
+    return κ * real(dot(d.μ, x)) - lognorm_vmf(p, κ)
 end
 function MeasureTheory.logdensity(d::VonMisesFisher{M,(:c,)}, x) where {M}
-    p = length(x)
+    p = size(x, 1)
     c = d.c
-    return real(dot(c, x)) - logvmfnorm(p, norm(c))
+    κ = norm(c)
+    return real(dot(c, x)) - lognorm_vmf(p, κ)
 end
 function MeasureTheory.logdensity(d::VonMisesFisher{M,(:F,)}, x) where {M}
     n = size(x, 1)
@@ -79,9 +80,12 @@ function MeasureTheory.logdensity(d::VonMisesFisher{M,(:M, :D, :Vt)}, x) where {
     return real(dot(D .* d.Vt, d.M' * x)) - logpFq((), (n//2,), Diagonal((D .^ 2) ./ 4))
 end
 
-# TODO: handle potential under/overflow
-function logvmfnorm(p, κ)
+# ₀F₁(p//2; κ²/4) = 2ᵛ Iᵥ(κ) / κᵛ / Γ(v + 1) for v = p/2 - 1
+# Note that the usual vMF constant Cₚ(κ) is defined wrt the un-normalized Hausdorff
+# measure, whereas we use the normalized Hausdorff measure here.
+function lognorm_vmf(p, κ)
+    iszero(κ) && return log(one(κ))
     ν = p//2 - 1
-    lognorm = ν * log(κ) - logbesseli(ν, κ)
-    return ifelse(iszero(κ), zero(lognorm), lognorm)
+    r = logbesseli(ν, κ) + ν * (logtwo - log(κ))
+    return r + loggamma(oftype(r, p//2))
 end

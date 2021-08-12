@@ -13,7 +13,3 @@ function pFq(()::Tuple{}, (α,)::NTuple{1}, z)
 end
 
 logpFq(a, b, z) = log(pFq(a, b, z))
-function logpFq(()::Tuple{}, (α,)::NTuple{1}, z)
-    x = sqrt(z)
-    return logbesseli(α - 1, 2x) + loggamma(α) + (1 - α) * log(x)
-end
