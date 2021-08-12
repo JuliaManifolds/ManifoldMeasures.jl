@@ -40,7 +40,7 @@ include("angularcentralgaussian.jl")
 # primitive
 export Normalized, Hausdorff, Haar, LeftHaar, RightHaar
 
-export AngularCentralGaussian, Bingham, Langevin, VonMisesFisher
+export AngularCentralGaussian, Bingham, Fisher, Langevin, VonMises, VonMisesFisher
 
 export normalize
 

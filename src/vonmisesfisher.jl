@@ -46,6 +46,32 @@ struct VonMisesFisher{M,N,T} <: ParameterizedMeasure{N}
 end
 VonMisesFisher(M; params...) = VonMisesFisher(M, NamedTuple(params))
 
+# common aliases
+
+"""
+    VonMises(𝔽=ℝ; params...)
+
+The von Mises distribution on the real or complex `Circle`.
+
+This is just a convenient alias for [`VonMisesFisher(Circle(𝔽); params...)`](@ref).
+
+# Constructors
+
+    VonMises(μ=π, κ=1)
+    VonMises(ℂ; μ=im, κ=1)
+    VonMises(ℂ; c=3+4im)
+"""
+const VonMises{𝔽,N,T} = VonMisesFisher{Circle{𝔽},N,T}
+VonMises(𝔽=ℝ; params...) = VonMisesFisher(Circle(𝔽); params...)
+
+"""
+    Fisher(; params...) = VonMisesFisher(Sphere(2); params...)
+
+The Fisher distribution on the 2-`Sphere`.
+"""
+const Fisher{N,T} = VonMisesFisher{Sphere{2},N,T}
+Fisher(; params...) = VonMisesFisher(Sphere(2); params...)
+
 const Langevin = VonMisesFisher
 
 function Base.show(io::IO, mime::MIME"text/plain", μ::VonMisesFisher)
@@ -56,6 +82,11 @@ Manifolds.base_manifold(d::VonMisesFisher) = getfield(d, :manifold)
 
 function MeasureTheory.basemeasure(μ::VonMisesFisher)
     return normalize(Hausdorff(base_manifold(μ)))
+end
+
+function MeasureTheory.logdensity(d::VonMises{ℝ,(:μ, :κ)}, x)
+    κ = d.κ
+    return κ * cos(only(x) - only(d.μ)) - logbesseli(0, κ)
 end
 
 function MeasureTheory.logdensity(d::VonMisesFisher{M,(:μ, :κ)}, x) where {M}
