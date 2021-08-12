@@ -10,19 +10,19 @@ For manifolds with matrix points, this is also called the Matrix Bingham distrib
 
 # Constructors
 
-    Bingham(M; B)
+    Bingham(M; A)
 
 For a manifold ``M ⊂ 𝔽^{n × k}``, construct the Bingham distribution parameterized by
-some positive definite matrix ``B ∈ 𝔽^{n × n}``.
+some positive definite matrix ``A ∈ 𝔽^{n × n}``.
 
 The density function with respect to the normalized [`Hausdorff`](@ref) measure on ``M`` is
 
 ```math
-p(x | B) = \\frac{\\exp(\\Re⟨x, Bx⟩)}{_1 F_1(\\frac{k}{2}, \\frac{n}{2}; B)},
+p(x | A) = \\frac{\\exp(\\Re⟨x, Ax⟩)}{_1 F_1(\\frac{k}{2}, \\frac{n}{2}; A)},
 ```
 
-where ``⟨⋅,⋅⟩`` is the Frobenius inner product, and ``_1 F_1(a, b; B)``
-is a hypergeometric function with matrix argument ``B``.
+where ``⟨⋅,⋅⟩`` is the Frobenius inner product, and ``_1 F_1(a, b; A)``
+is a hypergeometric function with matrix argument ``A``.
 """
 struct Bingham{M,N,T} <: ParameterizedMeasure{N}
     manifold::M
@@ -40,9 +40,9 @@ function MeasureTheory.basemeasure(μ::Bingham)
     return normalize(Hausdorff(base_manifold(μ)))
 end
 
-function MeasureTheory.logdensity(d::Bingham{M,(:B,)}, x) where {M}
+function MeasureTheory.logdensity(d::Bingham{M,(:A,)}, x) where {M}
     n = size(x, 1)
     k = size(x, 2)
-    B = d.B
-    return real(dot(x, B, x)) - logpFq((k//2,), (n//2,), B)
+    A = d.A
+    return real(dot(x, A, x)) - logpFq((k//2,), (n//2,), A)
 end
