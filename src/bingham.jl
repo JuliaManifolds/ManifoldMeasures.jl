@@ -23,6 +23,9 @@ p(x | A) = \\frac{\\exp(\\Re⟨x, Ax⟩)}{_1 F_1(\\frac{k}{2}, \\frac{n}{2}; A)}
 
 where ``⟨⋅,⋅⟩`` is the Frobenius inner product, and ``_1 F_1(a, b; A)``
 is a hypergeometric function with matrix argument ``A``.
+
+Note that ``p(x | A + α I) = p(x | A)`` for all scalars ``α ∈ 𝔽``.
+Hence, ``A`` can not be uniquely identified from draws from the Bingham distribution.
 """
 struct Bingham{M,N,T} <: ParameterizedMeasure{N}
     manifold::M

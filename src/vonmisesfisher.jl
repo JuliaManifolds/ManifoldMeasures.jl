@@ -9,8 +9,8 @@ or `SpecialOrthogonal` manifold `M`.
     VonMisesFisher(M::AbstractSphere{𝔽}; c)
     VonMisesFisher(M::AbstractSphere{𝔽}; μ, κ)
 
-Construct the vMF distribution on the `Sphere` parameterized either by the mean direction
-``μ ∈ 𝔽𝕊ⁿ`` and concentration ``κ ∈ ℝ⁺`` or by the single vector ``c = κμ``.
+Construct the vMF distribution on the `Sphere` parameterized either by the mean/modal
+direction ``μ ∈ 𝔽𝕊ⁿ`` and concentration ``κ ∈ ℝ⁺`` or by the single vector ``c = κμ``.
 
 The density of the vMF distribution on `Sphere(n, 𝔽)` with respect to the normalized
 Hausdorff measure is
@@ -23,13 +23,19 @@ where ``⟨⋅,⋅⟩`` is the Frobenius inner product, and ``I_ν(z)`` is the m
 function of the first kind.
 
     VonMisesFisher(M::Stiefel{n,k,𝔽}; F)
-    VonMisesFisher(M::Stiefel{n,k,𝔽}; M, D, Vt)
+    VonMisesFisher(M::Stiefel{n,k,𝔽}; U, D, V)
+    VonMisesFisher(M::Stiefel{n,k,𝔽}; H, P)
 
 Construct the (Matrix) vMF distribution on the `Stiefel(n,k,𝔽)` manifold parameterized
-either by the matrix ``F ∈ 𝔽^{n × k}`` or by its SVD decomposition ``F = M * D * Vt``.
+either by the matrix ``F ∈ 𝔽^{n × k}`` or by its SVD decomposition ``F = U D V^\\mathrm{H}``
+for ``U ∈ \\mathrm{St}(n, k)`` and ``V ∈ \\mathrm{O}(k)`` or by its polar decomposition
+``F = H P`` for ``H ∈ \\mathrm{St}(n,k,𝔽)`` and Hermitian positive definite ``p ∈ 𝔽^{k × k}``.
+The distribution has a mode at ``U V^\\mathrm{H}`` in the SVD parameterization and at ``H``
+in the polar parameterization. However, the mode is not necessarily unique.
 
 Because `Stiefel(n, n) = \\mathrm{SO}(n)`, these constructors also apply to `Rotations(n)`
-and `SpecialOrthogonal(n)`.
+and `SpecialOrthogonal(n)`; however, in this case the normalization constant will not be
+correct, and this distribution is only suitable as a prior.
 
 The density of the vMF distribution on `Stiefel(n, k, 𝔽)` with respect to the normalized
 Hausdorff measure is
@@ -105,10 +111,15 @@ function MeasureTheory.logdensity(d::VonMisesFisher{M,(:F,)}, x) where {M}
     F = d.F
     return real(dot(F, x)) - logpFq((), (n//2,), (F'F) / 4)
 end
-function MeasureTheory.logdensity(d::VonMisesFisher{M,(:M, :D, :Vt)}, x) where {M}
+function MeasureTheory.logdensity(d::VonMisesFisher{M,(:U, :D, :V)}, x) where {M}
     n = size(x, 1)
     D = d.D
-    return real(dot(D .* d.Vt, d.M' * x)) - logpFq((), (n//2,), Diagonal((D .^ 2) ./ 4))
+    return real(dot(D .* d.V', d.U' * x)) - logpFq((), (n//2,), Diagonal((D .^ 2) ./ 4))
+end
+function MeasureTheory.logdensity(d::VonMisesFisher{M,(:H, :P)}, x) where {M}
+    n = size(x, 1)
+    P = d.P
+    return real(dot(d.H, P, x)) - logpFq((), (n//2,), (P^2) / 4)
 end
 
 # ₀F₁(p//2; κ²/4) = 2ᵛ Iᵥ(κ) / κᵛ / Γ(v + 1) for v = p/2 - 1
