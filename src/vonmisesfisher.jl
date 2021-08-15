@@ -75,7 +75,7 @@ VonMises(𝔽=ℝ; params...) = VonMisesFisher(Circle(𝔽); params...)
 
 The Fisher distribution on the 2-`Sphere`.
 """
-const Fisher{N,T} = VonMisesFisher{Sphere{2},N,T}
+const Fisher{N,T} = VonMisesFisher{Sphere{2,ℝ},N,T}
 Fisher(; params...) = VonMisesFisher(Sphere(2); params...)
 
 const Langevin = VonMisesFisher
