@@ -1,41 +1,47 @@
 """
     VonMisesFisher(M; params...)
 
-The von Mises-Fisher (vMF) distribution on the `Sphere`, `Stiefel`, `Rotations`,
-or `SpecialOrthogonal` manifold `M`.
+The von Mises-Fisher (vMF) distribution on the `Sphere` or `Stiefel` manifold `M`.
 
-# Constructors
+Given a multivariate normal distribution with mean ``μ`` and identity covariance in
+the Euclidean space in which ``M`` is embedded, the von Mises-Fisher distribution with
+paramater ``μ`` is the restriction of this distribution to points on ``M``.
 
-    VonMisesFisher(M::AbstractSphere{𝔽}; c)
-    VonMisesFisher(M::AbstractSphere{𝔽}; μ, κ)
+# Parameterizations
 
-Construct the vMF distribution on the `Sphere` parameterized either by the mean/modal
-direction ``μ ∈ 𝔽𝕊ⁿ`` and concentration ``κ ∈ ℝ⁺`` or by the single vector ``c = κμ``.
+    VonMisesFisher(M::AbstractSphere{𝔽}; params...)
+    VonMisesFisher(n::Int[, 𝔽]; params...)
 
-The density of the vMF distribution on `Sphere(n, 𝔽)` with respect to the normalized
+Construct the vMF distribution on `Sphere(n-1,𝔽)==` ``𝔽𝕊^{n-1}```.
+
+Implemented parameterizations are:
+
+  - `(μ, κ)`: the modal direction ``μ ∈ 𝔽𝕊^{n-1}`` and concentration ``κ ∈ ℝ⁺``
+  - `(c,)`: ``c = κ μ ∈ 𝔽^n``, the mean of the normal distribution in the embedded space.
+
+The density of the vMF distribution on ``𝔽𝕊^{n-1}`` with respect to the normalized
 Hausdorff measure is
 
 ```math
-p(x | μ, κ) = \\frac{κ^{(n-1)/2}}{I_{(n-1)/2}(κ)} \\exp(κ \\Re⟨μ, x⟩)),
+p(x | μ, κ) = \\frac{Γ(ν + 1)κ^ν}{2^ν I_ν(κ)} \\exp(κ \\Re⟨μ, x⟩)),
 ```
 
-where ``⟨⋅,⋅⟩`` is the Frobenius inner product, and ``I_ν(z)`` is the modified Bessel
-function of the first kind.
+where ``ν = n/2-1``,  ``⟨⋅,⋅⟩`` is the Frobenius inner product, and ``I_ν(z)``
+is the modified Bessel function of the first kind.
 
-    VonMisesFisher(M::Stiefel{n,k,𝔽}; F)
-    VonMisesFisher(M::Stiefel{n,k,𝔽}; U, D, V)
-    VonMisesFisher(M::Stiefel{n,k,𝔽}; H, P)
+    VonMisesFisher(M::Stiefel{n,k,𝔽}; params...)
+    VonMisesFisher(n::Int, k::Int[, 𝔽]; params...)
 
-Construct the (Matrix) vMF distribution on the `Stiefel(n,k,𝔽)` manifold parameterized
-either by the matrix ``F ∈ 𝔽^{n × k}`` or by its SVD decomposition ``F = U D V^\\mathrm{H}``
-for ``U ∈ \\mathrm{St}(n, k)`` and ``V ∈ \\mathrm{O}(k)`` or by its polar decomposition
-``F = H P`` for ``H ∈ \\mathrm{St}(n,k,𝔽)`` and Hermitian positive definite ``p ∈ 𝔽^{k × k}``.
-The distribution has a mode at ``U V^\\mathrm{H}`` in the SVD parameterization and at ``H``
-in the polar parameterization. However, the mode is not necessarily unique.
+Construct the matrix vMF distribution on `Stiefel(n, k, 𝔽)=` ``\\mathrm{St}(n, k, 𝔽)``.
 
-Because `Stiefel(n, n) = \\mathrm{SO}(n)`, these constructors also apply to `Rotations(n)`
-and `SpecialOrthogonal(n)`; however, in this case the normalization constant will not be
-correct, and this distribution is only suitable as a prior.
+Implemented parameterizations are:
+
+  - `(F,)`: a parameter matrix ``F ∈ 𝔽^{n × k}``, the mean of the normal distribution in the
+    embedded space.
+  - `(U, D, V)`: The SVD decomposition of ``F = U D V``, where ``U ∈ \\mathrm{St}(n, k, 𝔽)`` and
+    ``V ∈ \\mathrm{U}(k, 𝔽)``.
+  - `(H, P)`: The polar decomposition of ``F = H P``, where ``H ∈ \\mathrm{St}(n, k, 𝔽)`` is the
+    mode, and ``P ∈ 𝔽^{k × k}`` is a Hermitian positive definite matrix.
 
 The density of the vMF distribution on `Stiefel(n, k, 𝔽)` with respect to the normalized
 Hausdorff measure is
