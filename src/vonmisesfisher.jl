@@ -147,3 +147,229 @@ function lognorm_vmf(p, κ)
     r = logbesseli(ν, κ) + ν * (logtwo - log(κ))
     return r + loggamma(oftype(r, p//2))
 end
+
+#
+# Random sampling
+#
+
+function Base.rand(rng::AbstractRNG, T::Type, d::VonMisesFisher)
+    p = default_point(d, T)
+    return Random.rand!(rng, p, d)
+end
+
+##
+## von Mises
+##
+
+# Best, D. J., and Nicholas I. Fisher. "Efficient simulation of the von Mises distribution."
+# Journal of the Royal Statistical Society: Series C (Applied Statistics) 28.2 (1979): 152-157.
+# doi: 10.2307/2346732
+function Base.rand(rng::AbstractRNG, T::Type, d::VonMises{ℝ,(:μ, :κ)})
+    κ = d.κ
+    tκ = 2κ
+    τ = 1 + sqrt(1 + tκ^2)
+    ρ = (τ - sqrt(2τ)) / tκ
+    r = (1 + ρ^2) / 2ρ
+    f = zero(T)
+    while true
+        z = cospi(rand(rng, T))
+        f = T((1 + r * z) / (r + z))
+        c = κ * (r - f)
+        u = rand(rng, T)
+        (c * (2 - c) > u || log(c / u) + 1 ≥ c) && break
+    end
+    θ₀ = acos(f)
+    θ = (rand(rng, (θ₀, -θ₀)))
+    return mod2pi(θ + d.μ + π) - π
+end
+function Base.rand(rng::AbstractRNG, T::Type, d::VonMises{ℂ,(:μ, :κ)})
+    θ = rand(rng, T, VonMises(ℝ; μ=angle(d.μ), κ=d.κ))
+    return cis(θ)
+end
+function Base.rand(rng::AbstractRNG, T::Type, d::VonMises{ℂ,(:c,)})
+    c = d.c
+    θ = rand(rng, T, VonMises(ℝ; μ=angle(c), κ=abs(c)))
+    return cis(θ)
+end
+
+##
+## von Mises-Fisher on the sphere
+##
+
+function Random.rand!(
+    rng::AbstractRNG, p::AbstractArray, d::VonMisesFisher{<:AbstractSphere,(:μ, :κ)}
+)
+    n = manifold_dimension(base_manifold(d)) + 1
+    return _rand_vmf_sphere!(rng, p, n, d.μ, d.κ)
+end
+function Random.rand!(
+    rng::AbstractRNG, p::AbstractArray, d::VonMisesFisher{<:AbstractSphere,(:c,)}
+)
+    n = manifold_dimension(base_manifold(d)) + 1
+    return _rand_vmf_sphere!(rng, p, n, d.c)
+end
+
+# Andrew T.A Wood (1994) Simulation of the von mises fisher distribution,
+# Communications in Statistics - Simulation and Computation, 23:1, 157-164
+# doi: 10.1080/0361091940881316
+function _rand_vmf_sphere!(rng, p, n, μ, κ)
+    eltype(p) <: Real && isone(n) && return _rand_vmf_0sphere!(rng, p, κ * μ)
+    T = real(eltype(p))
+    _rand_normal_vmf_sphere_xaxis!(rng, n, p, T(κ))
+    _reflect_from_xaxis_to_c!(p, μ, 1)
+    return p
+end
+function _rand_vmf_sphere!(rng, p, n, c)
+    eltype(p) <: Real && isone(n) && return _rand_vmf_0sphere!(rng, p, c)
+    T = real(eltype(p))
+    κ = norm(c)
+    _rand_normal_vmf_sphere_xaxis!(rng, n, p, T(κ))
+    _reflect_from_xaxis_to_c!(p, c, κ)
+    return p
+end
+function _rand_vmf_0sphere!(rng, p, c)
+    p[1] = rand(rng, Bernoulli(; logitp=2 * c[1])) ? 1 : -1
+    return p
+end
+
+# given p ~ vMF(μ, κ), where p = t μ + √(1 - t²) [0; ξ], for some ξ ∈ 𝕊ⁿ⁻²
+# is the tangent-normal decomposition of p, where ξ ~ H(𝕊ⁿ⁻²) and t ~ τ(n, κ).
+# draw t ~ τ(n, κ) ∝ (1 - t^2)^(n/2-1) exp(κ*t) using rejection sampling algorithm
+# due to Wood, 1994. Adapted also for complex and quaternionic spheres.
+function _rand_normal_vmf_sphere_xaxis!(rng, n, p, κ)
+    # compute quantities we will reuse
+    T = eltype(κ)
+    m = T((n - 1)//2)
+    a = κ / m
+    b = sqrt(a^2 + 1) - a
+    x = (1 - b) / (1 + b)
+    c = κ * x + (n - 1) * log1p(-x^2)
+    βdist = Beta(m, m)
+
+    z = rand(rng, T, βdist)
+    t = (1 - (1 + b) * z) / (1 - (1 - b) * z)
+    while κ * t + (n - 1) * log1p(-x * t) - c < log(rand(rng))
+        z = rand(rng, T, βdist)
+        t = (1 - (1 + b) * z) / (1 - (1 - b) * z)
+    end
+
+    randn!(rng, p)
+    p[1] -= real(p[1])
+    rmul!(p, sqrt(1 - abs2(t)) / norm(p))
+    @inbounds p[1] += t
+
+    return p
+end
+
+function _rand_normal_vmf_sphere_xaxis!(rng, n, p, κ)
+    # compute quantities we will reuse
+    T = eltype(κ)
+    m = T((n - 1)//2)
+    a = κ / m
+    b = sqrt(a^2 + 1) - a
+    x = (1 - b) / (1 + b)
+    c = κ * x + (n - 1) * log1p(-x^2)
+    βdist = Beta(m, m)
+
+    z = rand(rng, T, βdist)
+    t = (1 - (1 + b) * z) / (1 - (1 - b) * z)
+    while κ * t + (n - 1) * log1p(-x * t) - c < log(rand(rng))
+        z = rand(rng, T, βdist)
+        t = (1 - (1 + b) * z) / (1 - (1 - b) * z)
+    end
+
+    randn!(rng, p)
+    p[1] -= real(p[1])
+    rmul!(p, sqrt(1 - abs2(t)) / norm(p))
+    @inbounds p[1] += t
+
+    return p
+end
+
+# in-place apply Householder reflection p ↦ p - q 2𝕽⟨q,p⟩/‖q‖², for q=e₁-c/‖c‖
+function _reflect_from_xaxis_to_c!(p, c, cnorm=norm(c))
+    num = real(p[1]) - real(dot(c, p)) / cnorm
+    den = cnorm - real(c[1])
+    α = num / den
+    p .+= c .* α
+    p[1] -= α * cnorm
+    return p
+end
+
+##
+## von Mises-Fisher on the Stiefel manifold
+##
+
+function Random.rand!(
+    rng::AbstractRNG, p::AbstractArray, d::VonMisesFisher{<:Stiefel{n,k},(:U, :D, :V)}
+) where {n,k}
+    return _rand_vmf_stiefel!(rng, p, n, k, d.U, d.D, d.V)
+end
+function Random.rand!(
+    rng::AbstractRNG, p::AbstractArray, d::VonMisesFisher{<:Stiefel{n,k},(:F,)}
+) where {n,k}
+    U, D, V = svd(d.F)
+    return _rand_vmf_stiefel!(rng, p, n, k, U, D, V)
+end
+function Random.rand!(
+    rng::AbstractRNG, p::AbstractArray, d::VonMisesFisher{<:Stiefel{n,k},(:H, :P)}
+) where {n,k}
+    D, V = eigen(Hermitian(d.P))
+    U = d.H * V
+    return _rand_vmf_stiefel!(rng, p, n, k, U, D, V)
+end
+
+# Peter Hoff. Simulation of the Matrix Bingham—von Mises—Fisher Distribution,
+# With Applications to Multivariate and Relational Data.
+# Journal of Computational and Graphical Statistics. 18(2). 2009.
+function _rand_vmf_stiefel!(rng, p, n, k, U, D, V)
+    if isone(k)
+        _rand_vmf_sphere!(rng, vec(p), n, vec(U), D[1] * V[1]')
+        return p
+    end
+    T = real(eltype(p))
+    Z = fill!(similar(p), zero(T))
+    Z₁ = @view Z[:, 1]
+    U₁ = @view U[:, 1]
+    y = similar(Z₁)
+    z = similar(U₁)
+    while true
+        _rand_vmf_sphere!(rng, Z₁, n, U₁, D[1])
+        lcrit = zero(T)
+        for j in 2:k
+            s = n - j + 1
+            @views begin
+                N = _nullbasis(Z[:, 1:(j - 1)])
+                Uⱼ = U[:, j]
+                Zⱼ = Z[:, j]
+                zⱼ = z[1:s]
+                yⱼ = y[1:s]
+            end
+            Dⱼ = D[j]
+            if Dⱼ > 0
+                mul!(zⱼ, N', Uⱼ, Dⱼ, false)
+                _rand_vmf_sphere!(rng, yⱼ, s, zⱼ)
+                mul!(Zⱼ, N, yⱼ)
+                nzⱼ = norm(zⱼ)
+                ν = s//2 - 1
+                lcrit += T(
+                    logbesseli(ν, nzⱼ) - logbesseli(ν, Dⱼ) + ν * (log(Dⱼ) - log(nzⱼ))
+                )
+            else  # sample from uniform distribution, lcrit contribution is zero
+                randn!(rng, yⱼ)
+                mul!(Zⱼ, N, yⱼ, inv(norm(yⱼ)), false)
+            end
+        end
+        log(rand(rng)) < lcrit && break
+    end
+    mul!(p, Z, V')
+    return p
+end
+
+# basis N of null space of A, such that N'A=0
+# compute basis of null space of matrix A
+function _nullbasis(A)
+    F = qr(A)
+    rank = size(F.R, 1)
+    return F.Q[:, (rank + 1):end]
+end
