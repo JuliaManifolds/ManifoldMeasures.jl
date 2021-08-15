@@ -123,8 +123,8 @@ function MeasureTheory.logdensity(d::VonMisesFisher{M,(:H, :P)}, x) where {M}
 end
 
 StatsBase.mode(d::VonMisesFisher{<:Any,(:μ, :κ)}) = d.μ
-StatsBase.mode(d::VonMisesFisher{<:Any,(:c)}) = normalize(d.c)
-StatsBase.mode(d::VonMisesFisher{<:Any,(:F)}) = (F = svd(d.F); F.U * F.Vt)
+StatsBase.mode(d::VonMisesFisher{<:Any,(:c,)}) = normalize(d.c)
+StatsBase.mode(d::VonMisesFisher{<:Any,(:F,)}) = (F = svd(d.F); F.U * F.Vt)
 StatsBase.mode(d::VonMisesFisher{<:Any,(:U, :D, :V)}) = d.U * d.V'
 StatsBase.mode(d::VonMisesFisher{<:Any,(:H, :P)}) = d.H
 
