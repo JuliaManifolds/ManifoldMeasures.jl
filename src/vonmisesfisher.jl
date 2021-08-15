@@ -113,8 +113,8 @@ function MeasureTheory.logdensity(d::VonMisesFisher{M,(:F,)}, x) where {M}
 end
 function MeasureTheory.logdensity(d::VonMisesFisher{M,(:U, :D, :V)}, x) where {M}
     n = size(x, 1)
-    D = d.D
-    return real(dot(D .* d.V', d.U' * x)) - logpFq((), (n//2,), Diagonal((D .^ 2) ./ 4))
+    D = Diagonal(d.D)
+    return real(dot(D * d.V', d.U' * x)) - logpFq((), (n//2,), D .^ 2 ./ 4)
 end
 function MeasureTheory.logdensity(d::VonMisesFisher{M,(:H, :P)}, x) where {M}
     n = size(x, 1)
