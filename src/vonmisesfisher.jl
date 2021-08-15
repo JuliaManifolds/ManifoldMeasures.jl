@@ -51,6 +51,10 @@ struct VonMisesFisher{M,N,T} <: ParameterizedMeasure{N}
     par::NamedTuple{N,T}
 end
 VonMisesFisher(M; params...) = VonMisesFisher(M, NamedTuple(params))
+VonMisesFisher(p::Int, 𝔽=ℝ; params...) = VonMisesFisher(Sphere(p - 1, 𝔽); params...)
+function VonMisesFisher(n::Int, k::Int, 𝔽::AbstractNumbers=ℝ; params...)
+    return VonMisesFisher(Stiefel(n, k, 𝔽), params...)
+end
 
 # common aliases
 
