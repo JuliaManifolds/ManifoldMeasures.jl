@@ -261,31 +261,6 @@ function _rand_normal_vmf_sphere_xaxis!(rng, n, p, κ)
     return p
 end
 
-function _rand_normal_vmf_sphere_xaxis!(rng, n, p, κ)
-    # compute quantities we will reuse
-    T = eltype(κ)
-    m = T((n - 1)//2)
-    a = κ / m
-    b = sqrt(a^2 + 1) - a
-    x = (1 - b) / (1 + b)
-    c = κ * x + (n - 1) * log1p(-x^2)
-    βdist = Beta(m, m)
-
-    z = rand(rng, T, βdist)
-    t = (1 - (1 + b) * z) / (1 - (1 - b) * z)
-    while κ * t + (n - 1) * log1p(-x * t) - c < log(rand(rng))
-        z = rand(rng, T, βdist)
-        t = (1 - (1 + b) * z) / (1 - (1 - b) * z)
-    end
-
-    randn!(rng, p)
-    p[1] -= real(p[1])
-    rmul!(p, sqrt(1 - abs2(t)) / norm(p))
-    @inbounds p[1] += t
-
-    return p
-end
-
 # in-place apply Householder reflection p ↦ p - q 2𝕽⟨q,p⟩/‖q‖², for q=e₁-c/‖c‖
 function _reflect_from_xaxis_to_c!(p, c, cnorm=norm(c))
     num = real(p[1]) - real(dot(c, p)) / cnorm
