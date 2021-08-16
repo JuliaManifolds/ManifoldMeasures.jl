@@ -7,9 +7,4 @@ pFq((), (), x) = exp(tr(x)) # ₀F₀
 # matrix argument. Math. Comp. 75 (2006), 833-846
 # pFq(a::NTuple{p}, b::NTuple{q}, x)
 
-function pFq(()::Tuple{}, (α,)::NTuple{1}, z)
-    x = sqrt(z)
-    return besseli(α - 1, 2x) * gamma(α) * x^(1 - α)
-end
-
 logpFq(a, b, z) = log(pFq(a, b, z))
