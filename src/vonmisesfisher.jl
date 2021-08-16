@@ -3,9 +3,11 @@
 
 The von Mises-Fisher (vMF) distribution on the `Sphere` or `Stiefel` manifold `M`.
 
-Given a multivariate normal distribution with mean ``μ`` and identity covariance in
-the Euclidean space in which ``M`` is embedded, the von Mises-Fisher distribution with
-paramater ``μ`` is the restriction of this distribution to points on ``M``.
+Given a matrix ``X ∈ 𝔽^{n × k}`` with IID entries ``X_{ij} ∼ \\mathrm{Normal}(F_{ij}, 1)``
+for ``F ∈ 𝔽^{n × k}``, the restriction of the corresponding distribution in ``𝔽^{n × k}``
+to the `Stiefel(n, k, 𝔽)` manifold, that is, the matrices for which ``X^\\mathrm{H} X = I_k``,
+is the vMF distribution on the `Stiefel` manifold. The vMF distribution can also be specified
+for any submanifold of the `Stiefel` manifold, including the `Sphere` and the `Circle`.
 
 # Parameterizations
 
