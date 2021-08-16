@@ -137,8 +137,8 @@ end
 
 # Circle
 
-default_point(::Normalized{<:Hausdorff{Circle{ℝ}}}, T) = zero(float(real(T)))
-default_point(::Normalized{<:Hausdorff{Circle{ℂ}}}, T) = zero(complex(float(real(T))))
+default_point(::Normalized{<:Hausdorff{Circle{ℝ}}}, T::Type) = zero(float(real(T)))
+default_point(::Normalized{<:Hausdorff{Circle{ℂ}}}, T::Type) = zero(complex(float(real(T))))
 
 function Random.rand!(rng::AbstractRNG, p::Real, ::Normalized{<:Hausdorff{Circle{ℝ}}})
     return rand(rng, typeof(p)) * twoπ - π

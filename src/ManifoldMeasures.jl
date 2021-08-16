@@ -18,7 +18,7 @@ const MAX_LENGTH_SIZED = 100
 default_number_type(::typeof(ℝ), T) = real(T)
 default_number_type(::typeof(ℂ), T) = complex(real(T))
 
-function default_point(μ, ::Type{S}) where {S}
+function default_point(μ, S::Type)
     M = base_manifold(μ)
     T = default_number_type(number_system(M), S)
     sz = representation_size(M)
