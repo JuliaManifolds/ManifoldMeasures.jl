@@ -59,7 +59,7 @@ end
 VonMisesFisher(M; params...) = VonMisesFisher(M, NamedTuple(params))
 VonMisesFisher(p::Int, 𝔽=ℝ; params...) = VonMisesFisher(Sphere(p - 1, 𝔽); params...)
 function VonMisesFisher(n::Int, k::Int, 𝔽::AbstractNumbers=ℝ; params...)
-    return VonMisesFisher(Stiefel(n, k, 𝔽), params...)
+    return VonMisesFisher(Stiefel(n, k, 𝔽); params...)
 end
 
 # common aliases
@@ -133,7 +133,7 @@ function MeasureTheory.logdensity(d::VonMisesFisher{M,(:H, :P)}, x) where {M}
 end
 
 StatsBase.mode(d::VonMisesFisher{<:Any,(:μ, :κ)}) = d.μ
-StatsBase.mode(d::VonMisesFisher{<:Any,(:c,)}) = normalize(d.c)
+StatsBase.mode(d::VonMisesFisher{<:Any,(:c,)}) = (c = d.c; c / norm(c))
 StatsBase.mode(d::VonMisesFisher{<:Any,(:F,)}) = (F = svd(d.F); F.U * F.Vt)
 StatsBase.mode(d::VonMisesFisher{<:Any,(:U, :D, :V)}) = d.U * d.V'
 StatsBase.mode(d::VonMisesFisher{<:Any,(:H, :P)}) = d.H
@@ -165,7 +165,7 @@ end
 # Journal of the Royal Statistical Society: Series C (Applied Statistics) 28.2 (1979): 152-157.
 # doi: 10.2307/2346732
 function Base.rand(rng::AbstractRNG, T::Type, d::VonMises{ℝ,(:μ, :κ)})
-    κ = d.κ
+    κ = T(d.κ)
     tκ = 2κ
     τ = 1 + sqrt(1 + tκ^2)
     ρ = (τ - sqrt(2τ)) / tκ
@@ -180,7 +180,7 @@ function Base.rand(rng::AbstractRNG, T::Type, d::VonMises{ℝ,(:μ, :κ)})
     end
     θ₀ = acos(f)
     θ = (rand(rng, (θ₀, -θ₀)))
-    return mod2pi(θ + d.μ + π) - π
+    return mod2pi(θ + T(d.μ) + π) - π
 end
 function Base.rand(rng::AbstractRNG, T::Type, d::VonMises{ℂ,(:μ, :κ)})
     θ = rand(rng, T, VonMises(ℝ; μ=angle(d.μ), κ=d.κ))
