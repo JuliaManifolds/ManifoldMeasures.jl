@@ -280,28 +280,32 @@ end
 function Random.rand!(
     rng::AbstractRNG, p::AbstractArray, d::VonMisesFisher{<:Stiefel{n,k},(:U, :D, :V)}
 ) where {n,k}
-    return _rand_vmf_stiefel!(rng, p, n, k, d.U, d.D, d.V)
+    dim𝔽 = real_dimension(number_system(base_manifold(d)))
+    return _rand_vmf_stiefel!(rng, p, dim𝔽, n, k, d.U, d.D, d.V)
 end
 function Random.rand!(
     rng::AbstractRNG, p::AbstractArray, d::VonMisesFisher{<:Stiefel{n,k},(:F,)}
 ) where {n,k}
     U, D, V = svd(d.F)
-    return _rand_vmf_stiefel!(rng, p, n, k, U, D, V)
+    dim𝔽 = real_dimension(number_system(base_manifold(d)))
+    return _rand_vmf_stiefel!(rng, p, dim𝔽, n, k, U, D, V)
 end
 function Random.rand!(
     rng::AbstractRNG, p::AbstractArray, d::VonMisesFisher{<:Stiefel{n,k},(:H, :P)}
 ) where {n,k}
     D, V = eigen(Hermitian(d.P))
     U = d.H * V
-    return _rand_vmf_stiefel!(rng, p, n, k, U, D, V)
+    dim𝔽 = real_dimension(number_system(base_manifold(d)))
+    return _rand_vmf_stiefel!(rng, p, dim𝔽, n, k, U, D, V)
 end
 
 # Peter Hoff. Simulation of the Matrix Bingham—von Mises—Fisher Distribution,
 # With Applications to Multivariate and Relational Data.
 # Journal of Computational and Graphical Statistics. 18(2). 2009.
-function _rand_vmf_stiefel!(rng, p, n, k, U, D, V)
+function _rand_vmf_stiefel!(rng, p, dim𝔽, n, k, U, D, V)
     if isone(k)
-        _rand_vmf_sphere!(rng, vec(p), n, vec(U), D[1] * V[1]')
+        _rand_vmf_sphere!(rng, vec(p), dim𝔽 * n, vec(U), D[1])
+        rmul!(p, V[1]')
         return p
     end
     T = real(eltype(p))
@@ -311,10 +315,11 @@ function _rand_vmf_stiefel!(rng, p, n, k, U, D, V)
     y = similar(Z₁)
     z = similar(U₁)
     while true
-        _rand_vmf_sphere!(rng, Z₁, n, U₁, D[1])
+        _rand_vmf_sphere!(rng, Z₁, dim𝔽 * n, U₁, D[1])
         lcrit = zero(T)
         for j in 2:k
             s = n - j + 1
+            r = dim𝔽 * s
             @views begin
                 N = _nullbasis(Z[:, 1:(j - 1)])
                 Uⱼ = U[:, j]
@@ -325,10 +330,10 @@ function _rand_vmf_stiefel!(rng, p, n, k, U, D, V)
             Dⱼ = D[j]
             if Dⱼ > 0
                 mul!(zⱼ, N', Uⱼ, Dⱼ, false)
-                _rand_vmf_sphere!(rng, yⱼ, s, zⱼ)
+                _rand_vmf_sphere!(rng, yⱼ, r, zⱼ)
                 mul!(Zⱼ, N, yⱼ)
                 nzⱼ = norm(zⱼ)
-                ν = s//2 - 1
+                ν = r//2 - 1
                 lcrit += T(
                     logbesseli(ν, nzⱼ) - logbesseli(ν, Dⱼ) + ν * (log(Dⱼ) - log(nzⱼ))
                 )
