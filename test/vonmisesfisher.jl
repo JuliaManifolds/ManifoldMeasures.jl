@@ -64,6 +64,11 @@ end
     end
 
     @testset "VonMisesFisher" begin
+        @tesetset "show" begin
+            c = [1, 2, 3]
+            d = VonMisesFisher(Sphere(2, ℂ); c=c)
+            @test sprint(show, "text/plain", d) == "VonMisesFisher(Sphere(2, ℂ); c = [1, 2, 3])"
+        end
         @testset "Sphere" begin
             @testset "Sphere($n, $𝔽)" for 𝔽 in (ℝ, ℂ), n in (0, 1, 4)
                 T = 𝔽 === ℂ ? ComplexF64 : Float64

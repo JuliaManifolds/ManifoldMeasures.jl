@@ -1,7 +1,7 @@
 """
     VonMisesFisher(M; params...)
 
-The von Mises-Fisher (vMF) distribution on the `Sphere` or `Stiefel` manifold `M`.
+The von Mises-Fisher (vMF) or Langevin distribution on the `Sphere` or `Stiefel` manifold `M`.
 
 Given a matrix ``X ∈ 𝔽^{n × k}`` with IID entries ``X_{ij} ∼ \\mathrm{Normal}(F_{ij}, 1)``
 for ``F ∈ 𝔽^{n × k}``, the restriction of the corresponding distribution in ``𝔽^{n × k}``
@@ -64,8 +64,6 @@ function VonMisesFisher(n::Int, k::Int, 𝔽::AbstractNumbers=ℝ; params...)
     return VonMisesFisher(Stiefel(n, k, 𝔽); params...)
 end
 
-# common aliases
-
 """
     VonMises(𝔽=ℝ; params...)
 
@@ -81,16 +79,6 @@ This is just a convenient alias for [`VonMisesFisher(Circle(𝔽); params...)`](
 """
 const VonMises{𝔽,N,T} = VonMisesFisher{Circle{𝔽},N,T}
 VonMises(𝔽=ℝ; params...) = VonMisesFisher(Circle(𝔽); params...)
-
-"""
-    Fisher(; params...) = VonMisesFisher(Sphere(2); params...)
-
-The Fisher distribution on the 2-`Sphere`.
-"""
-const Fisher{N,T} = VonMisesFisher{Sphere{2,ℝ},N,T}
-Fisher(; params...) = VonMisesFisher(Sphere(2); params...)
-
-const Langevin = VonMisesFisher
 
 function Base.show(io::IO, mime::MIME"text/plain", μ::VonMisesFisher)
     return show_manifold_measure(io, mime, μ)
