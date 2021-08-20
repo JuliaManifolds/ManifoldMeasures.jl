@@ -205,15 +205,19 @@ end
 function _rand_vmf_sphere!(rng, p, n, μ, κ)
     eltype(p) <: Real && isone(n) && return _rand_vmf_0sphere!(rng, p, κ * μ)
     T = real(eltype(p))
-    _rand_normal_vmf_sphere_xaxis!(rng, n, p, T(κ))
+    t = _rand_normal_scale_vmf_sphere(rng, n, T(κ))
+    _rand_tangent_vmf_sphere!(rng, p)
+    _combine_tangent_normal_sphere!(p, t)
     _reflect_from_xaxis_to_c!(p, μ, 1)
     return p
 end
 function _rand_vmf_sphere!(rng, p, n, c)
     eltype(p) <: Real && isone(n) && return _rand_vmf_0sphere!(rng, p, c)
     T = real(eltype(p))
-    κ = norm(c)
-    _rand_normal_vmf_sphere_xaxis!(rng, n, p, T(κ))
+    κ = T(norm(c))
+    t = _rand_normal_scale_vmf_sphere(rng, n, κ)
+    _rand_tangent_vmf_sphere!(rng, p)
+    _combine_tangent_normal_sphere!(p, t)
     _reflect_from_xaxis_to_c!(p, c, κ)
     return p
 end
@@ -222,15 +226,23 @@ function _rand_vmf_0sphere!(rng, p, c)
     return p
 end
 
-# given p ~ vMF(μ, κ), where p = t μ + √(1 - t²) [0; ξ], for some ξ ∈ 𝕊ⁿ⁻²
-# is the tangent-normal decomposition of p, where ξ ~ H(𝕊ⁿ⁻²) and t ~ τ(n, κ).
-# draw t ~ τ(n, κ) ∝ (1 - t^2)^(n/2-1) exp(κ*t) using rejection sampling algorithm
-# due to Wood, 1994. Adapted also for complex and quaternionic spheres.
-function _rand_normal_vmf_sphere_xaxis!(rng, n, p, κ)
-    # compute quantities we will reuse
+# in the tangent-normal parameterization
+# p = t x + √(1 - t²) [0; ξ], for x the x-axis, ξ ∈ 𝕊ⁿ⁻², and t ∈ [-1, 1],
+# then ξ follows the normalized Hausdorff measure, and p(t) ∝ (1 - t^2)^((n-3)/2).
+# so we draw t and ξ, compose p, then then transform it using the reflection that
+# takes the x to μ.
+# Method due to Wood, 1994. Adapted also for complex and quaternionic spheres.
+function _rand_normal_scale_vmf_sphere(rng, n, κ)
     T = eltype(κ)
+    twoκ = 2κ
+    if n == 3
+        # 2t+1 follows an exponential distribution truncated to [0, 1]
+        # so we use inverse transform sampling
+        u = rand(rng, T)
+        return 1 + log(u + exp(-twoκ) * (1 - u)) / κ
+    end
     m = T((n - 1)//2)
-    a = κ / m
+    a = twoκ / (n - 1)
     b = sqrt(a^2 + 1) - a
     x = (1 - b) / (1 + b)
     c = κ * x + (n - 1) * log1p(-x^2)
@@ -242,15 +254,19 @@ function _rand_normal_vmf_sphere_xaxis!(rng, n, p, κ)
         z = rand(rng, T, βdist)
         t = (1 - (1 + b) * z) / (1 - (1 - b) * z)
     end
-
+    return t
+end
+function _rand_tangent_vmf_sphere!(rng, p)
     randn!(rng, p)
     p[1] -= real(p[1])
-    rmul!(p, sqrt(1 - abs2(t)) / norm(p))
-    @inbounds p[1] += t
-
+    rdiv!(p, norm(p))
     return p
 end
-
+function _combine_tangent_normal_sphere!(p, t)
+    rmul!(p, sqrt(1 - t^2))
+    p[1] += t
+    return p
+end
 # in-place apply Householder reflection p ↦ p - q 2𝕽⟨q,p⟩/‖q‖², for q=e₁-c/‖c‖
 function _reflect_from_xaxis_to_c!(p, c, cnorm=norm(c))
     num = real(p[1]) - real(dot(c, p)) / cnorm

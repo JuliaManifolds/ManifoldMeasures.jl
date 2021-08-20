@@ -64,7 +64,7 @@ end
     end
 
     @testset "VonMisesFisher" begin
-        @tesetset "show" begin
+        @testset "show" begin
             c = [1, 2, 3]
             d = VonMisesFisher(Sphere(2, ℂ); c=c)
             @test sprint(show, "text/plain", d) == "VonMisesFisher(Sphere(2, ℂ); c = [1, 2, 3])"
