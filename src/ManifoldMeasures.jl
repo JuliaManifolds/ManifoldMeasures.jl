@@ -9,6 +9,7 @@ using KeywordCalls,
     StaticArrays,
     StatsBase,
     StatsFuns
+using HypergeometricFunctions: HypergeometricFunctions
 using Manifolds: ℝ
 
 const MAX_LENGTH_SIZED = 100
