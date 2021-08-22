@@ -96,7 +96,7 @@ end
 function Random.rand!(
     rng::AbstractRNG, p::AbstractMatrix, ::Normalized{<:Hausdorff{Grassmann{n,k,𝔽}}}
 ) where {n,k,𝔽}
-    return rand!(rng, p, Hausdorff(Stiefel(n, k, 𝔽)))
+    return rand!(rng, p, normalize(Hausdorff(Stiefel(n, k, 𝔽))))
 end
 
 # because Gr(n,k,𝔽) = St(n,k,𝔽) / U(k,𝔽),
@@ -166,7 +166,7 @@ end
 # ProjectiveSpace
 
 function Random.rand!(
-    rng::AbstractRNG, p::AbstractArray, μ::Normalized{Hausdorff{<:AbstractProjectiveSpace}}
+    rng::AbstractRNG, p::AbstractArray, μ::Normalized{<:Hausdorff{<:AbstractProjectiveSpace}}
 )
     return normalize!(randn!(rng, p))
 end
