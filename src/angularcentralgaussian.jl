@@ -11,12 +11,12 @@ distribution.
 
 # Constructors
 
-    AngularCentralGaussian(M; Σ⁻¹)
+    AngularCentralGaussian(M; P)
     AngularCentralGaussian(M; L)
 
 For a manifold ``M ⊂ 𝔽^{n × k}``, construct the ACG distribution parameterized either by
-the inverse of an ``n × n`` positive definite matrix ``Σ`` or by its lower Cholesky factor
-``L``, such that ``Σ = L L^\\mathrm{T}``.
+the inverse ``P = Σ^{-1}`` of an ``n × n`` positive definite matrix ``Σ`` or by the lower
+Cholesky factor ``L`` of ``Σ``, such that ``Σ = L L^\\mathrm{H}``.
 """
 struct AngularCentralGaussian{M,N,T} <: ParameterizedMeasure{N}
     manifold::M
@@ -35,18 +35,27 @@ function MeasureTheory.basemeasure(μ::AngularCentralGaussian)
 end
 
 # Chikuse, 2003 Eq. 2.4.3
-# TODO: check exponents for complex case, see https://arxiv.org/abs/2010.03243
-function MeasureTheory.logdensity(d::AngularCentralGaussian{M,(:Σ⁻¹,)}, x) where {M}
-    n = size(x, 1)
-    k = size(x, 2)
-    Σ⁻¹ = d.Σ⁻¹
-    return (k * real(logdet(Σ⁻¹)) - n * log(real(dot(x, Σ⁻¹, x)))) / 2
+# extended to complex Stiefel using Eq. 6 of
+# Wróblewska J. A note on some extensions of the matrix angular central Gaussian distribution. 2020.
+# https://arxiv.org/abs/2010.03243
+function MeasureTheory.logdensity(μ::AngularCentralGaussian{<:Any,(:P,)}, x)
+    M = base_manifold(μ)
+    d = real_dimension(number_system(M))
+    s = representation_size(M)
+    n, k = length(s) > 1 ? s : (first(s), 1)
+    P = μ.P
+    logdetx′Px = isone(k) ? real(dot(x, P, x)) : real(logdet(x' * P * x))
+    return d * (k * real(logdet(P)) - n * logdetx′Px) / 2
 end
-function MeasureTheory.logdensity(d::AngularCentralGaussian{M,(:L,)}, x) where {M}
-    n = size(x, 1)
-    k = size(x, 2)
-    L = LowerTriangular(d.L)
-    return -k * real(logdet(L)) - n * log(norm(L \ x))
+function MeasureTheory.logdensity(μ::AngularCentralGaussian{<:Any,(:L,)}, x)
+    M = base_manifold(μ)
+    d = real_dimension(number_system(M))
+    s = representation_size(M)
+    n, k = length(s) > 1 ? s : (first(s), 1)
+    L = LowerTriangular(μ.L)
+    z = L \ x
+    logdetx′Px = isone(k) ? log(real(norm(z))) : real(logdet(z'z)) / 2
+    return -d * (k * real(logdet(L)) + n * logdetx′Px)
 end
 
 function Base.rand(rng::AbstractRNG, T::Type, d::AngularCentralGaussian)
