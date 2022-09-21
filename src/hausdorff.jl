@@ -25,7 +25,7 @@ area/volume of that region in the embedded space.
 Constructs the Hausdorff measure for the manifold `M` using the default embedding of the
 manifold.
 """
-struct Hausdorff{M,A} <: PrimitiveMeasure
+struct Hausdorff{M,A} <: MeasureBase.PrimitiveMeasure
     manifold::M
     atlas::A  # optional, when the Hausdorff measure is constructed from a Lebesgue measure
 end
@@ -36,13 +36,15 @@ function Base.show(io::IO, mime::MIME"text/plain", μ::Hausdorff)
     return show(io, mime, (μ.manifold, μ.atlas))
 end
 
-Manifolds.base_manifold(μ::Hausdorff) = μ.manifold
+ManifoldsBase.base_manifold(μ::Hausdorff) = μ.manifold
 
-MeasureTheory.insupport(μ::Hausdorff, x) = Manifolds.is_point(Manifolds.base_manifold(μ), x)
+function MeasureBase.insupport(μ::Hausdorff, x)
+    return ManifoldsBase.is_point(ManifoldsBase.base_manifold(μ), x)
+end
 
-MeasureTheory.logdensity_def(::Hausdorff, x) = zero(real(eltype(x)))
+MeasureBase.logdensity_def(::Hausdorff, x) = zero(real(eltype(x)))
 
-function Base.rand(rng::AbstractRNG, T::Type, μ::Normalized{<:Hausdorff})
+function Base.rand(rng::Random.AbstractRNG, T::Type, μ::Normalized{<:Hausdorff})
     p = default_point(μ, T)
     return Random.rand!(rng, p, μ)
 end
@@ -55,9 +57,9 @@ end
 # for all i, so that Q ~ Hausdorff(St(n,k,𝔽)).
 # See Theorem 2.3.19 of Gupta AK, Nagar DK. Matrix variate distributions. CRC Press; 2018
 function Random.rand!(
-    rng::AbstractRNG, p::AbstractMatrix, ::Normalized{<:Hausdorff{<:Stiefel}}
+    rng::Random.AbstractRNG, p::AbstractMatrix, ::Normalized{<:Hausdorff{<:Stiefel}}
 )
-    randn!(rng, p)
+    Random.randn!(rng, p)
     Q, _ = qr_unique!(p)
     return Q
 end
@@ -72,7 +74,7 @@ end
 # where d = real_dimension(𝔽)
 function logmass(::Hausdorff{Stiefel{n,k,ℂ}}) where {n,k}
     a = n - k
-    lfact = logfactorial(a)
+    lfact = SpecialFunctions.logfactorial(a)
     lm = k * logtwo + (k * (2n - k + 1)//2) * logπ - lfact
     for _ in 1:(k - 1)
         a += 1
@@ -83,7 +85,7 @@ function logmass(::Hausdorff{Stiefel{n,k,ℂ}}) where {n,k}
 end
 function logmass(::Hausdorff{Stiefel{n,k,ℍ}}) where {n,k}
     a = 2(n - k) + 1
-    lfact = logfactorial(a)
+    lfact = SpecialFunctions.logfactorial(a)
     lm = k * logtwo + (k * (a + k)) * logπ - lfact
     for _ in 1:(k - 1)
         a += 2
@@ -96,7 +98,7 @@ end
 # Grassmann
 
 function Random.rand!(
-    rng::AbstractRNG, p::AbstractMatrix, ::Normalized{<:Hausdorff{Grassmann{n,k,𝔽}}}
+    rng::Random.AbstractRNG, p::AbstractMatrix, ::Normalized{<:Hausdorff{Grassmann{n,k,𝔽}}}
 ) where {n,k,𝔽}
     return rand!(rng, p, normalize(Hausdorff(Stiefel(n, k, 𝔽))))
 end
@@ -110,7 +112,7 @@ function logmass(::Hausdorff{Grassmann{n,k,ℝ}}) where {n,k}
 end
 function logmass(::Hausdorff{Grassmann{n,k,ℂ}}) where {n,k}
     a = n - k
-    lfact1 = logfactorial(a)
+    lfact1 = SpecialFunctions.logfactorial(a)
     lfact2 = log(1)
     lm = k * a * logπ + lfact2 - lfact1
     for i in 1:(k - 1)
@@ -124,7 +126,7 @@ end
 function logmass(::Hausdorff{Grassmann{n,k,ℍ}}) where {n,k}
     a = 2(n - k) + 1
     b = 1
-    lfact1 = logfactorial(a)
+    lfact1 = SpecialFunctions.logfactorial(a)
     lfact2 = log(b)
     lm = 2 * k * (n - k) * logπ + lfact2 - lfact1
     for _ in 1:(k - 1)
@@ -142,10 +144,14 @@ end
 default_point(::Normalized{<:Hausdorff{Circle{ℝ}}}, T::Type) = zero(float(real(T)))
 default_point(::Normalized{<:Hausdorff{Circle{ℂ}}}, T::Type) = zero(complex(float(real(T))))
 
-function Random.rand!(rng::AbstractRNG, p::Real, ::Normalized{<:Hausdorff{Circle{ℝ}}})
+function Random.rand!(
+    rng::Random.AbstractRNG, p::Real, ::Normalized{<:Hausdorff{Circle{ℝ}}}
+)
     return rand(rng, typeof(p)) * twoπ - π
 end
-function Random.rand!(rng::AbstractRNG, p::Complex, ::Normalized{<:Hausdorff{Circle{ℂ}}})
+function Random.rand!(
+    rng::Random.AbstractRNG, p::Complex, ::Normalized{<:Hausdorff{Circle{ℂ}}}
+)
     return sign(randn(rng, typeof(p)))
 end
 
@@ -154,46 +160,48 @@ logmass(::Hausdorff{<:Circle}) = log2π
 # Sphere
 
 function Random.rand!(
-    rng::AbstractRNG, p::AbstractArray, μ::Normalized{<:Hausdorff{<:AbstractSphere}}
+    rng::Random.AbstractRNG, p::AbstractArray, μ::Normalized{<:Hausdorff{<:AbstractSphere}}
 )
-    return normalize!(randn!(rng, p))
+    return normalize!(Random.randn!(rng, p))
 end
 
 function logmass(μ::Hausdorff{<:AbstractSphere{𝔽}}) where {𝔽}
-    m = prod(representation_size(base_manifold(μ)))
-    ν = real_dimension(𝔽) * m//2
-    return logtwo + ν * logπ - loggamma(ν)
+    m = prod(ManifoldsBase.representation_size(ManifoldsBase.base_manifold(μ)))
+    ν = ManifoldsBase.real_dimension(𝔽) * m//2
+    return logtwo + ν * logπ - SpecialFunctions.loggamma(ν)
 end
 
 # ProjectiveSpace
 
 function Random.rand!(
-    rng::AbstractRNG, p::AbstractArray, μ::Normalized{<:Hausdorff{<:AbstractProjectiveSpace}}
+    rng::Random.AbstractRNG,
+    p::AbstractArray,
+    μ::Normalized{<:Hausdorff{<:AbstractProjectiveSpace}},
 )
-    return normalize!(randn!(rng, p))
+    return normalize!(Random.randn!(rng, p))
 end
 
 # because 𝔽ℙⁿ = 𝔽𝕊ⁿ / 𝔽𝕊⁰, then vol(𝔽ℙⁿ) = vol(𝔽𝕊ⁿ) / vol(𝔽𝕊⁰)
 function logmass(μ::Hausdorff{<:AbstractProjectiveSpace{ℝ}})
-    m = prod(representation_size(base_manifold(μ)))
+    m = prod(ManifoldsBase.representation_size(ManifoldsBase.base_manifold(μ)))
     ν = m//2
-    return ν * logπ - loggamma(ν)
+    return ν * logπ - SpecialFunctions.loggamma(ν)
 end
 function logmass(μ::Hausdorff{<:AbstractProjectiveSpace{ℂ}})
-    m = prod(representation_size(base_manifold(μ)))
+    m = prod(ManifoldsBase.representation_size(ManifoldsBase.base_manifold(μ)))
     n = m - 1
-    return n * logπ - logfactorial(n)
+    return n * logπ - SpecialFunctions.logfactorial(n)
 end
 function logmass(μ::Hausdorff{<:AbstractProjectiveSpace{ℍ}})
-    m = prod(representation_size(base_manifold(μ)))
+    m = prod(ManifoldsBase.representation_size(ManifoldsBase.base_manifold(μ)))
     n = m - 1
-    return 2n * logπ - loggamma(2(n + 1))
+    return 2n * logπ - SpecialFunctions.loggamma(2(n + 1))
 end
 
 # Rotations/SpecialOrthogonal
 
 function Random.rand!(
-    rng::AbstractRNG,
+    rng::Random.AbstractRNG,
     p::AbstractMatrix,
     ::Normalized{<:Hausdorff{<:Union{Rotations,SpecialOrthogonal}}},
 )

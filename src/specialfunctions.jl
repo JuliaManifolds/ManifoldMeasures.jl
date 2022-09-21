@@ -1,4 +1,4 @@
-logbesseli(ν, x) = log(besselix(ν * one(real(x)), x)) + abs(real(x))
+logbesseli(ν, x) = log(SpecialFunctions.besselix(ν * one(real(x)), x)) + abs(real(x))
 
 # hypergeometric functions with matrix arguments
 function pFq end

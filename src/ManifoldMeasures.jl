@@ -1,17 +1,30 @@
 module ManifoldMeasures
 
-using KeywordCalls,
-    LinearAlgebra,
-    Manifolds,
-    MeasureTheory,
-    Random,
-    SpecialFunctions,
-    StaticArrays,
-    StatsBase,
-    StatsFuns
 using HypergeometricFunctions: HypergeometricFunctions
-using Manifolds: ℝ
+using KeywordCalls: KeywordCalls
+using LinearAlgebra
+using Manifolds:
+    Manifolds,
+    ℝ,
+    ℂ,
+    ℍ,
+    AbstractProjectiveSpace,
+    AbstractSphere,
+    Circle,
+    Grassmann,
+    Rotations,
+    SpecialOrthogonal,
+    Sphere,
+    Stiefel
+using ManifoldsBase: ManifoldsBase
+using MeasureBase: MeasureBase
+using MeasureTheory: Bernoulli, Beta
+using Random: Random
 using RealDot: realdot
+using SpecialFunctions: SpecialFunctions
+using StaticArraysCore: StaticArraysCore
+using StatsBase: StatsBase
+using StatsFuns
 
 const MAX_LENGTH_SIZED = 100
 
@@ -21,13 +34,19 @@ default_number_type(::typeof(ℝ), T) = real(T)
 default_number_type(::typeof(ℂ), T) = complex(real(T))
 
 function default_point(μ, S::Type)
-    M = base_manifold(μ)
-    T = default_number_type(number_system(M), S)
-    sz = representation_size(M)
-    return prod(sz) ≤ MAX_LENGTH_SIZED ? MArray{Tuple{sz...},T}(undef) : Array{T}(undef, sz)
+    M = ManifoldsBase.base_manifold(μ)
+    T = default_number_type(ManifoldsBase.number_system(M), S)
+    sz = ManifoldsBase.representation_size(M)
+    if prod(sz) ≤ MAX_LENGTH_SIZED
+        return StaticArraysCore.MArray{Tuple{sz...},T}(undef)
+    else
+        return Array{T}(undef, sz)
+    end
 end
 
-Manifolds.base_manifold(μ::AbstractMeasure) = base_manifold(basemeasure(μ))
+function ManifoldsBase.base_manifold(μ::MeasureBase.AbstractMeasure)
+    return ManifoldsBase.base_manifold(MeasureBase.basemeasure(μ))
+end
 
 include("utils.jl")
 include("specialfunctions.jl")

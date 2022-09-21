@@ -6,7 +6,7 @@ function show_manifold_measure(io, mime, μ)
         field_string = field_string[1:(end - 1)]
     end
     print(io, name, "(", field_string)
-    par = params(μ)
+    par = MeasureBase.params(μ)
     if !isempty(par)
         par_string = sprint(show, mime, par)[2:(end - 1)]
         if endswith(par_string, ",")
