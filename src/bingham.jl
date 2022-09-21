@@ -39,6 +39,8 @@ end
 
 Manifolds.base_manifold(d::Bingham) = getfield(d, :manifold)
 
+MeasureTheory.insupport(μ::Bingham, x) = Manifolds.is_point(Manifolds.base_manifold(μ), x)
+
 function MeasureTheory.basemeasure(μ::Bingham)
     return normalize(Hausdorff(base_manifold(μ)))
 end

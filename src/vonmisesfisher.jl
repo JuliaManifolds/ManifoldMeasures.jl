@@ -86,6 +86,8 @@ end
 
 Manifolds.base_manifold(d::VonMisesFisher) = getfield(d, :manifold)
 
+MeasureTheory.insupport(μ::VonMisesFisher, x) = Manifolds.is_point(Manifolds.base_manifold(μ), x)
+
 function MeasureTheory.basemeasure(μ::VonMisesFisher)
     return normalize(Hausdorff(base_manifold(μ)))
 end

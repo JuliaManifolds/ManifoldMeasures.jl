@@ -59,4 +59,6 @@ Manifolds.base_manifold(μ::Haar) = μ.group
 Manifolds.base_group(μ::Haar) = μ.group
 Manifolds.direction(μ::Haar) = μ.direction
 
+MeasureTheory.insupport(μ::Haar, x) = Manifolds.is_point(Manifolds.base_manifold(μ), x)
+
 MeasureTheory.logdensity_def(::Haar, x) = zero(real(eltype(x)))
