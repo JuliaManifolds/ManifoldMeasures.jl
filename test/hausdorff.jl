@@ -36,9 +36,9 @@ using Manifolds: ℝ
             @testset "n=$n" for n in 0:10
                 @test mass(Hausdorff(ProjectiveSpace(n))) ≈ mass(Hausdorff(Sphere(n))) / 2
                 @test mass(Hausdorff(ProjectiveSpace(n, ℂ))) ≈
-                      mass(Hausdorff(Sphere(n, ℂ))) / mass(Hausdorff(Sphere(0, ℂ)))
+                    mass(Hausdorff(Sphere(n, ℂ))) / mass(Hausdorff(Sphere(0, ℂ)))
                 @test mass(Hausdorff(ProjectiveSpace(n, ℍ))) ≈
-                      mass(Hausdorff(Sphere(n, ℍ))) / mass(Hausdorff(Sphere(0, ℍ)))
+                    mass(Hausdorff(Sphere(n, ℍ))) / mass(Hausdorff(Sphere(0, ℍ)))
             end
         end
 
@@ -52,18 +52,18 @@ using Manifolds: ℝ
             end
             @testset "Stiefel($n, $k, $𝔽)" for n in 1:10, k in 1:2:n, 𝔽 in (ℝ, ℂ, ℍ)
                 k == 1 && @test mass(Hausdorff(Stiefel(n, k, 𝔽))) ≈
-                      mass(Hausdorff(Sphere(n - 1, 𝔽)))
+                    mass(Hausdorff(Sphere(n - 1, 𝔽)))
                 @test mass(Hausdorff(Stiefel(n, k, 𝔽))) ≈
-                      mass_stiefel_recursive(Stiefel(n, k, 𝔽))
+                    mass_stiefel_recursive(Stiefel(n, k, 𝔽))
             end
         end
 
         @testset "Grassmann" begin
             @testset "Grassmann($n, $k, $𝔽)" for n in 1:10, k in 1:2:n, 𝔽 in (ℝ, ℂ, ℍ)
                 k == 1 && @test mass(Hausdorff(Grassmann(n, k, 𝔽))) ≈
-                      mass(Hausdorff(ProjectiveSpace(n - 1, 𝔽)))
+                    mass(Hausdorff(ProjectiveSpace(n - 1, 𝔽)))
                 @test mass(Hausdorff(Grassmann(n, k, 𝔽))) ≈
-                      mass(Hausdorff(Stiefel(n, k, 𝔽))) / mass(Hausdorff(Stiefel(k, k, 𝔽)))
+                    mass(Hausdorff(Stiefel(n, k, 𝔽))) / mass(Hausdorff(Stiefel(k, k, 𝔽)))
             end
         end
 
