@@ -23,7 +23,7 @@ using Random: Random
 using RealDot: realdot
 using SpecialFunctions: SpecialFunctions
 using StaticArraysCore: StaticArraysCore
-using StatsBase: StatsBase
+using StatsBase: StatsBase, mode
 using StatsFuns
 
 const MAX_LENGTH_SIZED = 100
