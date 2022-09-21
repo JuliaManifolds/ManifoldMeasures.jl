@@ -12,7 +12,7 @@ using Manifolds: ℝ
         @test d.atlas isa Nothing
         @test sprint(show, "text/plain", d) === "Hausdorff($M, nothing)"
         p = normalize(randn(3))
-        @test iszero(logdensity(d, p))
+        @test iszero(logdensityof(d, p))
     end
 
     @testset "manifolds" begin

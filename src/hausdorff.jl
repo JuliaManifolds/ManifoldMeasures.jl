@@ -38,7 +38,7 @@ end
 
 Manifolds.base_manifold(μ::Hausdorff) = μ.manifold
 
-MeasureTheory.logdensity(::Hausdorff, x) = zero(eltype(x))
+MeasureTheory.logdensity_def(::Hausdorff, x) = zero(real(eltype(x)))
 
 function Base.rand(rng::AbstractRNG, T::Type, μ::Normalized{<:Hausdorff})
     p = default_point(μ, T)

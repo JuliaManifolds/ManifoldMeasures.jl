@@ -90,33 +90,33 @@ function MeasureTheory.basemeasure(μ::VonMisesFisher)
     return normalize(Hausdorff(base_manifold(μ)))
 end
 
-function MeasureTheory.logdensity(d::VonMises{ℝ,(:μ, :κ)}, x)
+function MeasureTheory.logdensity_def(d::VonMises{ℝ,(:μ, :κ)}, x)
     κ = d.κ
     return κ * cos(only(x) - only(d.μ)) - logbesseli(0, κ)
 end
 
-function MeasureTheory.logdensity(d::VonMisesFisher{M,(:μ, :κ)}, x) where {M}
+function MeasureTheory.logdensity_def(d::VonMisesFisher{M,(:μ, :κ)}, x) where {M}
     p = manifold_dimension(base_manifold(d)) + 1
     κ = d.κ
     return κ * real(dot(d.μ, x)) - lognorm_vmf(p, κ)
 end
-function MeasureTheory.logdensity(d::VonMisesFisher{M,(:c,)}, x) where {M}
+function MeasureTheory.logdensity_def(d::VonMisesFisher{M,(:c,)}, x) where {M}
     p = manifold_dimension(base_manifold(d)) + 1
     c = d.c
     κ = norm(c)
     return real(dot(c, x)) - lognorm_vmf(p, κ)
 end
-function MeasureTheory.logdensity(d::VonMisesFisher{M,(:F,)}, x) where {M}
+function MeasureTheory.logdensity_def(d::VonMisesFisher{M,(:F,)}, x) where {M}
     n, _ = representation_size(base_manifold(d))
     F = d.F
     return real(dot(F, x)) - logpFq((), (n//2,), (F'F) / 4)
 end
-function MeasureTheory.logdensity(d::VonMisesFisher{M,(:U, :D, :V)}, x) where {M}
+function MeasureTheory.logdensity_def(d::VonMisesFisher{M,(:U, :D, :V)}, x) where {M}
     n, _ = representation_size(base_manifold(d))
     D = Diagonal(d.D)
     return real(dot(D * d.V', d.U' * x)) - logpFq((), (n//2,), D .^ 2 ./ 4)
 end
-function MeasureTheory.logdensity(d::VonMisesFisher{M,(:H, :P)}, x) where {M}
+function MeasureTheory.logdensity_def(d::VonMisesFisher{M,(:H, :P)}, x) where {M}
     n, _ = representation_size(base_manifold(d))
     P = d.P
     return real(dot(d.H, P, x)) - logpFq((), (n//2,), (P^2) / 4)

@@ -38,7 +38,7 @@ end
 # extended to complex Stiefel using Eq. 6 of
 # Wróblewska J. A note on some extensions of the matrix angular central Gaussian distribution. 2020.
 # https://arxiv.org/abs/2010.03243
-function MeasureTheory.logdensity(μ::AngularCentralGaussian{<:Any,(:P,)}, x)
+function MeasureTheory.logdensity_def(μ::AngularCentralGaussian{<:Any,(:P,)}, x)
     M = base_manifold(μ)
     d = real_dimension(number_system(M))
     s = representation_size(M)
@@ -47,7 +47,7 @@ function MeasureTheory.logdensity(μ::AngularCentralGaussian{<:Any,(:P,)}, x)
     logdetx′Px = isone(k) ? real(dot(x, P, x)) : real(logdet(x' * P * x))
     return d * (k * real(logdet(P)) - n * logdetx′Px) / 2
 end
-function MeasureTheory.logdensity(μ::AngularCentralGaussian{<:Any,(:L,)}, x)
+function MeasureTheory.logdensity_def(μ::AngularCentralGaussian{<:Any,(:L,)}, x)
     M = base_manifold(μ)
     d = real_dimension(number_system(M))
     s = representation_size(M)

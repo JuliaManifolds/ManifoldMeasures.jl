@@ -43,7 +43,7 @@ function MeasureTheory.basemeasure(μ::Bingham)
     return normalize(Hausdorff(base_manifold(μ)))
 end
 
-function MeasureTheory.logdensity(d::Bingham{M,(:A,)}, x) where {M}
+function MeasureTheory.logdensity_def(d::Bingham{M,(:A,)}, x) where {M}
     n = size(x, 1)
     k = size(x, 2)
     A = d.A

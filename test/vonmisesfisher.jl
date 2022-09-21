@@ -13,8 +13,8 @@ function test_vMF(
 
     if check_logdensity
         v = project(M, μ, x)
-        @test logdensity(d, μ) ≥ logdensity(d, exp(M, μ, v, 1e-5))
-        @test logdensity(d, μ) ≥ logdensity(d, exp(M, μ, v, -1e-5))
+        @test logdensityof(d, μ) ≥ logdensityof(d, exp(M, μ, v, 1e-5))
+        @test logdensityof(d, μ) ≥ logdensityof(d, exp(M, μ, v, -1e-5))
     end
 
     # check rand returns the right type

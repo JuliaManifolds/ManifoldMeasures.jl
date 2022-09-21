@@ -59,4 +59,4 @@ Manifolds.base_manifold(μ::Haar) = μ.group
 Manifolds.base_group(μ::Haar) = μ.group
 Manifolds.direction(μ::Haar) = μ.direction
 
-MeasureTheory.logdensity(::Haar, x) = zero(eltype(x))
+MeasureTheory.logdensity_def(::Haar, x) = zero(real(eltype(x)))
