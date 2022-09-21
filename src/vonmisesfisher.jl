@@ -100,23 +100,23 @@ end
 function MeasureTheory.logdensity_def(d::VonMisesFisher{M,(:μ, :κ)}, x) where {M}
     p = manifold_dimension(base_manifold(d)) + 1
     κ = d.κ
-    return κ * real(dot(d.μ, x)) - lognorm_vmf(p, κ)
+    return κ * realdot(d.μ, x) - lognorm_vmf(p, κ)
 end
 function MeasureTheory.logdensity_def(d::VonMisesFisher{M,(:c,)}, x) where {M}
     p = manifold_dimension(base_manifold(d)) + 1
     c = d.c
     κ = norm(c)
-    return real(dot(c, x)) - lognorm_vmf(p, κ)
+    return realdot(c, x) - lognorm_vmf(p, κ)
 end
 function MeasureTheory.logdensity_def(d::VonMisesFisher{M,(:F,)}, x) where {M}
     n, _ = representation_size(base_manifold(d))
     F = d.F
-    return real(dot(F, x)) - logpFq((), (n//2,), (F'F) / 4)
+    return realdot(F, x) - logpFq((), (n//2,), (F'F) / 4)
 end
 function MeasureTheory.logdensity_def(d::VonMisesFisher{M,(:U, :D, :V)}, x) where {M}
     n, _ = representation_size(base_manifold(d))
     D = Diagonal(d.D)
-    return real(dot(D * d.V', d.U' * x)) - logpFq((), (n//2,), D .^ 2 ./ 4)
+    return realdot(D * d.V', d.U' * x) - logpFq((), (n//2,), D .^ 2 ./ 4)
 end
 function MeasureTheory.logdensity_def(d::VonMisesFisher{M,(:H, :P)}, x) where {M}
     n, _ = representation_size(base_manifold(d))
@@ -271,7 +271,7 @@ function _combine_tangent_normal_sphere!(p, t)
 end
 # in-place apply Householder reflection p ↦ p - q 2𝕽⟨q,p⟩/‖q‖², for q=e₁-c/‖c‖
 function _reflect_from_xaxis_to_c!(p, c, cnorm=norm(c))
-    num = real(p[1]) - real(dot(c, p)) / cnorm
+    num = real(p[1]) - realdot(c, p) / cnorm
     den = cnorm - real(c[1])
     α = num / den
     p .+= c .* α

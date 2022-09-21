@@ -11,6 +11,7 @@ using KeywordCalls,
     StatsFuns
 using HypergeometricFunctions: HypergeometricFunctions
 using Manifolds: ℝ
+using RealDot: realdot
 
 const MAX_LENGTH_SIZED = 100
 
