@@ -1,5 +1,5 @@
 function qr_unique!(A)
-    Q, R = qr(A)
+    Q, R = LinearAlgebra.qr(A)
     s = @views sign.(real.(R[diagind(R)]))
     A .= Q .* s'
     R .*= s
@@ -7,7 +7,7 @@ function qr_unique!(A)
 end
 
 function svd_unique(A)
-    F = svd(A)
+    F = LinearAlgebra.svd(A)
     U = F.U
     U1 = @view U[1, :]
     F.Vt .*= sign.(U1)

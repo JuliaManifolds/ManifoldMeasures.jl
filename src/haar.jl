@@ -22,41 +22,45 @@ The convenient aliases [`LeftHaar`](@ref) and [`RightHaar`](@ref) are also provi
 
 Construct the `D`-invariant Haar measure on group manifold `G`.
 """
-struct Haar{G,D} <: PrimitiveMeasure
+struct Haar{G,D} <: MeasureBase.PrimitiveMeasure
     group::G
     direction::D
 end
-Haar(G) = Haar(G, LeftAction())
+Haar(G) = Haar(G, Manifolds.LeftAction())
 
 """
     LeftHaar{G<:AbstractManifold}
 
 Alias for a left-[`Haar`](@ref) measure.
 """
-const LeftHaar{G} = Haar{G,LeftAction}
-LeftHaar(G) = Haar(G, LeftAction())
+const LeftHaar{G} = Haar{G,Manifolds.LeftAction}
+LeftHaar(G) = Haar(G, Manifolds.LeftAction())
 
 """
 RightHaar{G<:AbstractManifold}
 
 Alias for a right-[`Haar`](@ref) measure.
 """
-const RightHaar{M} = Haar{M,RightAction}
-RightHaar(G) = Haar(G, RightAction())
+const RightHaar{M} = Haar{M,Manifolds.RightAction}
+RightHaar(G) = Haar(G, Manifolds.RightAction())
 
 function Base.show(io::IO, mime::MIME"text/plain", μ::LeftHaar)
     print(io, "LeftHaar(")
-    show(io, mime, base_manifold(μ))
+    show(io, mime, ManifoldsBase.base_manifold(μ))
     return print(io, ")")
 end
 function Base.show(io::IO, mime::MIME"text/plain", μ::RightHaar)
     print(io, "RightHaar(")
-    show(io, mime, base_manifold(μ))
+    show(io, mime, ManifoldsBase.base_manifold(μ))
     return print(io, ")")
 end
 
-Manifolds.base_manifold(μ::Haar) = μ.group
+ManifoldsBase.base_manifold(μ::Haar) = μ.group
 Manifolds.base_group(μ::Haar) = μ.group
 Manifolds.direction(μ::Haar) = μ.direction
 
-MeasureTheory.logdensity(::Haar, x) = zero(eltype(x))
+function MeasureBase.insupport(μ::Haar, x)
+    return ManifoldsBase.is_point(ManifoldsBase.base_manifold(μ), x)
+end
+
+MeasureBase.logdensity_def(::Haar, x) = zero(real(eltype(x)))

@@ -54,13 +54,13 @@ p(x | F) = \\frac{\\exp(\\Re⟨F, x⟩)}{_0 F_1(\\frac{n}{2}; \\frac{1}{4} F^\\m
 
 where ``_0 F_1(b; B)`` is a hypergeometric function with matrix argument ``B``.
 """
-struct VonMisesFisher{M,N,T} <: ParameterizedMeasure{N}
+struct VonMisesFisher{M,N,T} <: MeasureBase.ParameterizedMeasure{N}
     manifold::M
     par::NamedTuple{N,T}
 end
 VonMisesFisher(M; params...) = VonMisesFisher(M, NamedTuple(params))
 VonMisesFisher(p::Int, 𝔽=ℝ; params...) = VonMisesFisher(Sphere(p - 1, 𝔽); params...)
-function VonMisesFisher(n::Int, k::Int, 𝔽::AbstractNumbers=ℝ; params...)
+function VonMisesFisher(n::Int, k::Int, 𝔽::ManifoldsBase.AbstractNumbers=ℝ; params...)
     return VonMisesFisher(Stiefel(n, k, 𝔽); params...)
 end
 
@@ -84,40 +84,44 @@ function Base.show(io::IO, mime::MIME"text/plain", μ::VonMisesFisher)
     return show_manifold_measure(io, mime, μ)
 end
 
-Manifolds.base_manifold(d::VonMisesFisher) = getfield(d, :manifold)
+ManifoldsBase.base_manifold(d::VonMisesFisher) = getfield(d, :manifold)
 
-function MeasureTheory.basemeasure(μ::VonMisesFisher)
-    return normalize(Hausdorff(base_manifold(μ)))
+function MeasureBase.insupport(μ::VonMisesFisher, x)
+    return ManifoldsBase.is_point(ManifoldsBase.base_manifold(μ), x)
 end
 
-function MeasureTheory.logdensity(d::VonMises{ℝ,(:μ, :κ)}, x)
+function MeasureBase.basemeasure(μ::VonMisesFisher)
+    return normalize(Hausdorff(ManifoldsBase.base_manifold(μ)))
+end
+
+function MeasureBase.logdensity_def(d::VonMises{ℝ,(:μ, :κ)}, x)
     κ = d.κ
     return κ * cos(only(x) - only(d.μ)) - logbesseli(0, κ)
 end
 
-function MeasureTheory.logdensity(d::VonMisesFisher{M,(:μ, :κ)}, x) where {M}
-    p = manifold_dimension(base_manifold(d)) + 1
+function MeasureBase.logdensity_def(d::VonMisesFisher{M,(:μ, :κ)}, x) where {M}
+    p = ManifoldsBase.manifold_dimension(ManifoldsBase.base_manifold(d)) + 1
     κ = d.κ
-    return κ * real(dot(d.μ, x)) - lognorm_vmf(p, κ)
+    return κ * realdot(d.μ, x) - lognorm_vmf(p, κ)
 end
-function MeasureTheory.logdensity(d::VonMisesFisher{M,(:c,)}, x) where {M}
-    p = manifold_dimension(base_manifold(d)) + 1
+function MeasureBase.logdensity_def(d::VonMisesFisher{M,(:c,)}, x) where {M}
+    p = ManifoldsBase.manifold_dimension(ManifoldsBase.base_manifold(d)) + 1
     c = d.c
     κ = norm(c)
-    return real(dot(c, x)) - lognorm_vmf(p, κ)
+    return realdot(c, x) - lognorm_vmf(p, κ)
 end
-function MeasureTheory.logdensity(d::VonMisesFisher{M,(:F,)}, x) where {M}
-    n, _ = representation_size(base_manifold(d))
+function MeasureBase.logdensity_def(d::VonMisesFisher{M,(:F,)}, x) where {M}
+    n, _ = ManifoldsBase.representation_size(ManifoldsBase.base_manifold(d))
     F = d.F
-    return real(dot(F, x)) - logpFq((), (n//2,), (F'F) / 4)
+    return realdot(F, x) - logpFq((), (n//2,), (F'F) / 4)
 end
-function MeasureTheory.logdensity(d::VonMisesFisher{M,(:U, :D, :V)}, x) where {M}
-    n, _ = representation_size(base_manifold(d))
+function MeasureBase.logdensity_def(d::VonMisesFisher{M,(:U, :D, :V)}, x) where {M}
+    n, _ = ManifoldsBase.representation_size(ManifoldsBase.base_manifold(d))
     D = Diagonal(d.D)
-    return real(dot(D * d.V', d.U' * x)) - logpFq((), (n//2,), D .^ 2 ./ 4)
+    return realdot(D * d.V', d.U' * x) - logpFq((), (n//2,), D .^ 2 ./ 4)
 end
-function MeasureTheory.logdensity(d::VonMisesFisher{M,(:H, :P)}, x) where {M}
-    n, _ = representation_size(base_manifold(d))
+function MeasureBase.logdensity_def(d::VonMisesFisher{M,(:H, :P)}, x) where {M}
+    n, _ = ManifoldsBase.representation_size(ManifoldsBase.base_manifold(d))
     P = d.P
     return real(dot(d.H, P, x)) - logpFq((), (n//2,), (P^2) / 4)
 end
@@ -135,14 +139,14 @@ function lognorm_vmf(p, κ)
     iszero(κ) && return log(one(κ))
     ν = p//2 - 1
     r = logbesseli(ν, κ) + ν * (logtwo - log(κ))
-    return r + loggamma(oftype(r, p//2))
+    return r + SpecialFunctions.loggamma(oftype(r, p//2))
 end
 
 #
 # Random sampling
 #
 
-function Base.rand(rng::AbstractRNG, T::Type, d::VonMisesFisher)
+function Base.rand(rng::Random.AbstractRNG, T::Type, d::VonMisesFisher)
     p = default_point(d, T)
     return Random.rand!(rng, p, d)
 end
@@ -154,7 +158,7 @@ end
 # Best, D. J., and Nicholas I. Fisher. "Efficient simulation of the von Mises distribution."
 # Journal of the Royal Statistical Society: Series C (Applied Statistics) 28.2 (1979): 152-157.
 # doi: 10.2307/2346732
-function Base.rand(rng::AbstractRNG, T::Type, d::VonMises{ℝ,(:μ, :κ)})
+function Base.rand(rng::Random.AbstractRNG, T::Type, d::VonMises{ℝ,(:μ, :κ)})
     κ = T(d.κ)
     tκ = 2κ
     τ = 1 + sqrt(1 + tκ^2)
@@ -172,11 +176,11 @@ function Base.rand(rng::AbstractRNG, T::Type, d::VonMises{ℝ,(:μ, :κ)})
     θ = (rand(rng, (θ₀, -θ₀)))
     return mod2pi(θ + T(d.μ) + π) - π
 end
-function Base.rand(rng::AbstractRNG, T::Type, d::VonMises{ℂ,(:μ, :κ)})
+function Base.rand(rng::Random.AbstractRNG, T::Type, d::VonMises{ℂ,(:μ, :κ)})
     θ = rand(rng, T, VonMises(ℝ; μ=angle(d.μ), κ=d.κ))
     return cis(θ)
 end
-function Base.rand(rng::AbstractRNG, T::Type, d::VonMises{ℂ,(:c,)})
+function Base.rand(rng::Random.AbstractRNG, T::Type, d::VonMises{ℂ,(:c,)})
     c = d.c
     θ = rand(rng, T, VonMises(ℝ; μ=angle(c), κ=abs(c)))
     return cis(θ)
@@ -187,15 +191,15 @@ end
 ##
 
 function Random.rand!(
-    rng::AbstractRNG, p::AbstractArray, d::VonMisesFisher{<:AbstractSphere,(:μ, :κ)}
+    rng::Random.AbstractRNG, p::AbstractArray, d::VonMisesFisher{<:AbstractSphere,(:μ, :κ)}
 )
-    n = manifold_dimension(base_manifold(d)) + 1
+    n = ManifoldsBase.manifold_dimension(ManifoldsBase.base_manifold(d)) + 1
     return _rand_vmf_sphere!(rng, p, n, d.μ, d.κ)
 end
 function Random.rand!(
-    rng::AbstractRNG, p::AbstractArray, d::VonMisesFisher{<:AbstractSphere,(:c,)}
+    rng::Random.AbstractRNG, p::AbstractArray, d::VonMisesFisher{<:AbstractSphere,(:c,)}
 )
-    n = manifold_dimension(base_manifold(d)) + 1
+    n = ManifoldsBase.manifold_dimension(ManifoldsBase.base_manifold(d)) + 1
     return _rand_vmf_sphere!(rng, p, n, d.c)
 end
 
@@ -257,7 +261,7 @@ function _rand_normal_scale_vmf_sphere(rng, n, κ)
     return t
 end
 function _rand_tangent_vmf_sphere!(rng, p)
-    randn!(rng, p)
+    Random.randn!(rng, p)
     p[1] -= real(p[1])
     rdiv!(p, norm(p))
     return p
@@ -269,7 +273,7 @@ function _combine_tangent_normal_sphere!(p, t)
 end
 # in-place apply Householder reflection p ↦ p - q 2𝕽⟨q,p⟩/‖q‖², for q=e₁-c/‖c‖
 function _reflect_from_xaxis_to_c!(p, c, cnorm=norm(c))
-    num = real(p[1]) - real(dot(c, p)) / cnorm
+    num = real(p[1]) - realdot(c, p) / cnorm
     den = cnorm - real(c[1])
     α = num / den
     p .+= c .* α
@@ -282,24 +286,32 @@ end
 ##
 
 function Random.rand!(
-    rng::AbstractRNG, p::AbstractArray, d::VonMisesFisher{<:Stiefel{n,k},(:U, :D, :V)}
+    rng::Random.AbstractRNG,
+    p::AbstractArray,
+    d::VonMisesFisher{<:Stiefel{n,k},(:U, :D, :V)},
 ) where {n,k}
-    dim𝔽 = real_dimension(number_system(base_manifold(d)))
+    dim𝔽 = ManifoldsBase.real_dimension(
+        ManifoldsBase.number_system(ManifoldsBase.base_manifold(d))
+    )
     return _rand_vmf_stiefel!(rng, p, dim𝔽, n, k, d.U, d.D, d.V)
 end
 function Random.rand!(
-    rng::AbstractRNG, p::AbstractArray, d::VonMisesFisher{<:Stiefel{n,k},(:F,)}
+    rng::Random.AbstractRNG, p::AbstractArray, d::VonMisesFisher{<:Stiefel{n,k},(:F,)}
 ) where {n,k}
-    U, D, V = svd(d.F)
-    dim𝔽 = real_dimension(number_system(base_manifold(d)))
+    U, D, V = LinearAlgebra.svd(d.F)
+    dim𝔽 = ManifoldsBase.real_dimension(
+        ManifoldsBase.number_system(ManifoldsBase.base_manifold(d))
+    )
     return _rand_vmf_stiefel!(rng, p, dim𝔽, n, k, U, D, V)
 end
 function Random.rand!(
-    rng::AbstractRNG, p::AbstractArray, d::VonMisesFisher{<:Stiefel{n,k},(:H, :P)}
+    rng::Random.AbstractRNG, p::AbstractArray, d::VonMisesFisher{<:Stiefel{n,k},(:H, :P)}
 ) where {n,k}
     D, V = eigen(Hermitian(d.P))
     U = d.H * V
-    dim𝔽 = real_dimension(number_system(base_manifold(d)))
+    dim𝔽 = ManifoldsBase.real_dimension(
+        ManifoldsBase.number_system(ManifoldsBase.base_manifold(d))
+    )
     return _rand_vmf_stiefel!(rng, p, dim𝔽, n, k, U, D, V)
 end
 
@@ -342,7 +354,7 @@ function _rand_vmf_stiefel!(rng, p, dim𝔽, n, k, U, D, V)
                     logbesseli(ν, nzⱼ) - logbesseli(ν, Dⱼ) + ν * (log(Dⱼ) - log(nzⱼ))
                 )
             else  # sample from uniform distribution, lcrit contribution is zero
-                randn!(rng, yⱼ)
+                Random.randn!(rng, yⱼ)
                 mul!(Zⱼ, N, yⱼ, inv(norm(yⱼ)), false)
             end
         end
@@ -355,7 +367,7 @@ end
 # basis N of null space of A, such that N'A=0
 # compute basis of null space of matrix A
 function _nullbasis(A)
-    F = qr(A)
+    F = LinearAlgebra.qr(A)
     rank = size(F.R, 1)
     return F.Q[:, (rank + 1):end]
 end

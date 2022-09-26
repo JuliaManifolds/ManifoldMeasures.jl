@@ -13,8 +13,8 @@ function test_vMF(
 
     if check_logdensity
         v = project(M, μ, x)
-        @test logdensity(d, μ) ≥ logdensity(d, exp(M, μ, v, 1e-5))
-        @test logdensity(d, μ) ≥ logdensity(d, exp(M, μ, v, -1e-5))
+        @test logdensityof(d, μ) ≥ logdensityof(d, exp(M, μ, v, 1e-5))
+        @test logdensityof(d, μ) ≥ logdensityof(d, exp(M, μ, v, -1e-5))
     end
 
     # check rand returns the right type
@@ -68,7 +68,7 @@ end
             c = [1, 2, 3]
             d = VonMisesFisher(Sphere(2, ℂ); c=c)
             @test sprint(show, "text/plain", d) ==
-                  "VonMisesFisher(Sphere(2, ℂ); c = [1, 2, 3])"
+                "VonMisesFisher(Sphere(2, ℂ); c = [1, 2, 3])"
         end
         @testset "Sphere" begin
             @testset "Sphere($n, $𝔽)" for 𝔽 in (ℝ, ℂ), n in (0, 1, 4)

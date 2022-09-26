@@ -27,7 +27,7 @@ is a hypergeometric function with matrix argument ``A``.
 Note that ``p(x | A + α I) = p(x | A)`` for all scalars ``α ∈ 𝔽``.
 Hence, ``A`` can not be uniquely identified from draws from the Bingham distribution.
 """
-struct Bingham{M,N,T} <: ParameterizedMeasure{N}
+struct Bingham{M,N,T} <: MeasureBase.ParameterizedMeasure{N}
     manifold::M
     par::NamedTuple{N,T}
 end
@@ -37,13 +37,17 @@ function Base.show(io::IO, mime::MIME"text/plain", μ::Bingham)
     return show_manifold_measure(io, mime, μ)
 end
 
-Manifolds.base_manifold(d::Bingham) = getfield(d, :manifold)
+ManifoldsBase.base_manifold(d::Bingham) = getfield(d, :manifold)
 
-function MeasureTheory.basemeasure(μ::Bingham)
-    return normalize(Hausdorff(base_manifold(μ)))
+function MeasureBase.insupport(μ::Bingham, x)
+    return ManifoldsBase.is_point(ManifoldsBase.base_manifold(μ), x)
 end
 
-function MeasureTheory.logdensity(d::Bingham{M,(:A,)}, x) where {M}
+function MeasureBase.basemeasure(μ::Bingham)
+    return normalize(Hausdorff(ManifoldsBase.base_manifold(μ)))
+end
+
+function MeasureBase.logdensity_def(d::Bingham{M,(:A,)}, x) where {M}
     n = size(x, 1)
     k = size(x, 2)
     A = d.A
